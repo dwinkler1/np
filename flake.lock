@@ -1,0 +1,90 @@
+{
+  "nodes": {
+    "nCats": {
+      "inputs": {
+        "nixCats": "nixCats",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "plugins-r": "plugins-r",
+        "rixpkgs": "rixpkgs"
+      },
+      "locked": {
+        "lastModified": 1747269608,
+        "narHash": "sha256-p6zniXPFJV5ImScTWStHWXcPYox7J7USFr/90u0x118=",
+        "owner": "dwinkler1",
+        "repo": "nixCatsConfig",
+        "rev": "3c720b7789839fcac8bccf999a795cbd73c1bca2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dwinkler1",
+        "repo": "nixCatsConfig",
+        "type": "github"
+      }
+    },
+    "nixCats": {
+      "locked": {
+        "lastModified": 1745981575,
+        "narHash": "sha256-Q9PevfxZeO47fBd5ptGA4f+xJ8iC8jF/hsEVhRIOofo=",
+        "owner": "BirdeeHub",
+        "repo": "nixCats-nvim",
+        "rev": "4cdecb9f07973fc0fe2d069d153bc9344db36791",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BirdeeHub",
+        "repo": "nixCats-nvim",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1746525332,
+        "narHash": "sha256-hnr+j3EeNt0An/+2N+7p7/UAfR3jWTaHSwHdr7K86aU=",
+        "type": "tarball",
+        "url": "https://github.com/rstats-on-nix/nixpkgs/archive/2025-05-05.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/rstats-on-nix/nixpkgs/archive/2025-05-05.tar.gz"
+      }
+    },
+    "plugins-r": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1746657805,
+        "narHash": "sha256-X5ZfbrG7FtGJpnMJ2b7FMY/OM9rIIliFSqnbtudZCZg=",
+        "owner": "R-nvim",
+        "repo": "R.nvim",
+        "rev": "f30c3b2be9ca1a3c277c5e66f5612774cc3fbcf4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "R-nvim",
+        "repo": "R.nvim",
+        "type": "github"
+      }
+    },
+    "rixpkgs": {
+      "locked": {
+        "lastModified": 1746476429,
+        "narHash": "sha256-KHNAOy8ILpIlz5rtwxURpcVOqbWRMoT/rXRgpy1pyG8=",
+        "type": "tarball",
+        "url": "https://github.com/rstats-on-nix/nixpkgs/archive/2025-04-29.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/rstats-on-nix/nixpkgs/archive/2025-04-29.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nCats": "nCats",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
