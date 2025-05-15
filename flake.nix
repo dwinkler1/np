@@ -42,6 +42,8 @@
                   (rWrapper.override {
                     packages = rpkgs;
                   })
+                  just
+                  wget
                 ];
               }
             );
