@@ -1,6 +1,6 @@
 {
   description = "Project Templates";
-  output = {self}: {
+  outputs = {self}: {
     templates = {
       r = {
         path = ./templates/r;
