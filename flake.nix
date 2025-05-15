@@ -35,7 +35,7 @@
                 ...
               }@packageDef:
               let
-                rpkgs = import ./rpkgs.nix pkgs.rPackages;
+                rpkgs = import ./rpkgs.nix pkgs;
               in
               {
                 lspsAndRuntimeDeps.rdev = with pkgs; [
