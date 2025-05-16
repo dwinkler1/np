@@ -7,51 +7,49 @@
     nCats.url = "github:dwinkler1/nixCatsConfig";
     nCats.inputs.nixpkgs.follows = "nixpkgs";
   };
-  outputs =
-    {
-      self,
-      nixpkgs,
-      nCats,
-      ...
-    }@inputs:
-    let
-      forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
-    in
-    {
-      packages = forSystems (
-        system:
-        let
+  outputs = {
+    self,
+    nixpkgs,
+    nCats,
+    ...
+  } @ inputs: let
+    forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
+  in {
+    packages = forSystems (
+      system: let
+        inherit (nCats) utils;
+        finalPackage = nCats.packages.${system}.default.override (prev: {
+          dependencyOverlays =
+            prev.dependencyOverlays
+            ++ [
+              (utils.standardPluginOverlay inputs)
+              (import ./rpkgs.nix)
+            ];
+          categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
+            {
+              pkgs,
+              settings,
+              categories,
+              name,
+              extra,
+              mkPlugin,
+              ...
+            } @ packageDef: let
+              rpkgs = import ./rpkgs.nix pkgs;
+            in {
+              lspsAndRuntimeDeps.rdev = with pkgs; [
+                rWrapper
+                just
+                wget
+              ];
+            }
+          );
 
-          inherit (nCats) utils;
-          finalPackage = nCats.packages.${system}.default.override (prev: {
-            categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
-              {
-                pkgs,
-                settings,
-                categories,
-                name,
-                extra,
-                mkPlugin,
-                ...
-              }@packageDef:
-              let
-                rpkgs = import ./rpkgs.nix pkgs;
-              in
-              {
-                lspsAndRuntimeDeps.rdev = with pkgs; [
-                  (rWrapper.override {
-                    packages = rpkgs;
-                  })
-                  just
-                  wget
-                ];
-              }
-            );
-
-            packageDefinitions = prev.packageDefinitions // {
+          packageDefinitions =
+            prev.packageDefinitions
+            // {
               nixCats = utils.mergeCatDefs prev.packageDefinitions.nixCats (
-                { ... }:
-                {
+                {...}: {
                   settings = {
                     suffix-path = false;
                     suffix-LD = false;
@@ -62,11 +60,10 @@
                 }
               );
             };
-          });
-        in
+        });
+      in
         # and
         utils.mkAllWithDefault finalPackage
-
-      );
-    };
+    );
+  };
 }
