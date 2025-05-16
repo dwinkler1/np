@@ -11,7 +11,7 @@ final: prev: {
       broom
       (buildRPackage {
         name = "nvimcom";
-        src = pkgs.fetchFromGitHub {
+        src = prev.fetchFromGitHub {
           owner = "R-nvim";
           repo = "R.nvim";
           rev = "f30c3b2be9ca1a3c277c5e66f5612774cc3fbcf4";
