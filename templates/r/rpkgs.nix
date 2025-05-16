@@ -20,10 +20,10 @@ final: prev: {
         sourceRoot = "source/nvimcom";
         buildInputs = with prev; [
           R
-          gcc
+          stdenv.cc.cc
           gnumake
         ];
-        propagatedBuildInputs = [ ];
+        propagatedBuildInputs = [];
       })
     ];
   };
