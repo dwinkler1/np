@@ -10,10 +10,10 @@
         "rixpkgs": "rixpkgs"
       },
       "locked": {
-        "lastModified": 1747862291,
+        "lastModified": 1748694453,
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "4b6dea3c813aa5cc391d0ce1747e61cadf7092fc",
+        "rev": "bdb5944a73179fd943d3da9bcf97ceba757dc27d",
         "type": "github"
       },
       "original": {
