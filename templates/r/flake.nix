@@ -1,9 +1,8 @@
 {
   description = "Project Template";
   inputs = {
-    nixpkgs = {
-      url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-05-05.tar.gz";
-    };
+    rixpkgs.url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-05-19.tar.gz";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nCats.url = "github:dwinkler1/nixCatsConfig";
     nCats.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -23,6 +22,9 @@
             prev.dependencyOverlays
             ++ [
               (utils.standardPluginOverlay inputs)
+              (final: prev: {
+                rpkgs = import inputs.rixpkgs {inherit system;};
+              })
               (import ./rpkgs.nix)
             ];
           categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
