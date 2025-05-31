@@ -23,9 +23,12 @@
             ++ [
               (utils.standardPluginOverlay inputs)
               (final: prev: {
-                rpkgs = import inputs.rixpkgs {inherit system;};
+                rpkgs = inputs.rixpkgs.legacyPackages.${system};
               })
-              (import ./rpkgs.nix)
+              (import (builtins.path {
+                path = ./rpkgs.nix;
+                name = "my-rpackages";
+              }))
             ];
           categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
             {
@@ -36,9 +39,7 @@
               extra,
               mkPlugin,
               ...
-            } @ packageDef: let
-              rpkgs = import ./rpkgs.nix pkgs;
-            in {
+            } @ packageDef: {
               lspsAndRuntimeDeps.rdev = with pkgs; [
                 rWrapper
                 just
@@ -64,7 +65,6 @@
             };
         });
       in
-        # and
         utils.mkAllWithDefault finalPackage
     );
   };

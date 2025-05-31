@@ -28,6 +28,7 @@ final: prev: let
     })
   ];
 in {
-  rWrapper = prev.rpkgs.rWrapper.override {packages = reqPkgs;};
   quarto = prev.rpkgs.quarto.override {extraRPackages = reqPkgs;};
+  rWrapper = prev.rpkgs.rWrapper.override {packages = reqPkgs;};
+  radianWrapper = prev.rpkgs.radianWrapper.override {packages = reqPkgs;};
 }
