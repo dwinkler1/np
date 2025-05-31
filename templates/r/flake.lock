@@ -10,10 +10,10 @@
         "rixpkgs": "rixpkgs"
       },
       "locked": {
-        "lastModified": 1748694453,
+        "lastModified": 1748732737,
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "bdb5944a73179fd943d3da9bcf97ceba757dc27d",
+        "rev": "4e9707ad08e7eb587ebc3bca838e380098fb9561",
         "type": "github"
       },
       "original": {
@@ -39,10 +39,10 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1748506378,
+        "lastModified": 1748662220,
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "3866ad91cfc172f08a6839def503d8fc2923c603",
+        "rev": "59138c7667b7970d205d6a05a8bfa2d78caa3643",
         "type": "github"
       },
       "original": {
