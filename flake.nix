@@ -7,7 +7,11 @@
         path = ./templates/r;
         description = "R development environment";
       };
+      sci = {
+        path = ./templates/sci;
+        description = "Scientific computing environment (Julia, Python, R)";
+      }
     };
-    defaultTemplate = self.templates.r;
+    defaultTemplate = self.templates.sci;
   };
 }
