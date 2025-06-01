@@ -107,6 +107,16 @@
                           args = ["--add-flags" "run marimo edit"];
                         };
                       };
+                      n = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.neovide}/bin/neovide";
+                          args = [
+                            "--add-flags"
+                            "--neovim-bin ${name}"
+                          ];
+                        };
+                      };
                     };
                   };
                   categories = {
