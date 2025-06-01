@@ -80,6 +80,11 @@
                   "--unset PYTHONPATH"
                 ];
               };
+              bashBeforeWrapper = {
+                pydev = [
+                  "uv sync"
+                ];
+              };
             }
           );
 
@@ -97,7 +102,7 @@
                         enable = true;
                         path = {
                           value = "${pkgs.uv}/bin/uv";
-                          args = [ "--add-flags" "run marimo edit"];
+                          args = ["--add-flags" "run marimo edit"];
                         };
                       };
                     };
