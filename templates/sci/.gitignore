@@ -1,3 +1,4 @@
 data/*
 !data/.gitkeep
 .venv
+__marimo__
