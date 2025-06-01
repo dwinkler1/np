@@ -82,6 +82,8 @@
               };
               bashBeforeWrapper = {
                 pydev = [
+                  "export UV_PYTHON=${pkgs.py.interpreter}"
+                  "export UV_PYTHON_DOWNLOADS=\"never\""
                   "uv sync"
                 ];
               };
