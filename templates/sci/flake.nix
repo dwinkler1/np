@@ -94,7 +94,7 @@
             prev.packageDefinitions
             // {
               nixCats = utils.mergeCatDefs prev.packageDefinitions.nixCats (
-                {pkgs, ...}: {
+                {pkgs, name, ...}: {
                   settings = {
                     suffix-path = false;
                     suffix-LD = false;
