@@ -10,7 +10,7 @@
       sci = {
         path = ./templates/sci;
         description = "Scientific computing environment (Julia, Python, R)";
-      }
+      };
     };
     defaultTemplate = self.templates.sci;
   };
