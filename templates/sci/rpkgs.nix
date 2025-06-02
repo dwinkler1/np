@@ -9,6 +9,7 @@ final: prev: let
     janitor
     psych
     tidyr
+    quarto
     languageserver
     (buildRPackage {
       name = "nvimcom";

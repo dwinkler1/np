@@ -62,6 +62,9 @@
                 jldev = with pkgs; [
                   julia-bin
                 ];
+                quarto = with pkgs; [
+                  quarto
+                ]
               };
 
               environmentVariables = {
@@ -124,6 +127,7 @@
                     rdev = true;
                     pydev = true;
                     jldev = true;
+                    quarto = true;
                   };
                 }
               );

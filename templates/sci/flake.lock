@@ -10,10 +10,10 @@
         "rixpkgs": "rixpkgs"
       },
       "locked": {
-        "lastModified": 1748808131,
+        "lastModified": 1748873246,
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "b5cbf7502b5d7d58cd5dc8c73ac40a5744f2e767",
+        "rev": "20b2d747fa1961c8edaba7635fdc11189baa98e8",
         "type": "github"
       },
       "original": {
@@ -24,10 +24,10 @@
     },
     "nixCats": {
       "locked": {
-        "lastModified": 1748230488,
+        "lastModified": 1748760778,
         "owner": "BirdeeHub",
         "repo": "nixCats-nvim",
-        "rev": "2a2f15a6c085524ac121f5da9a73ee2155c53d70",
+        "rev": "88cde33af841e2aa1ea0c83c4d9dcfefdde54fb3",
         "type": "github"
       },
       "original": {
@@ -38,10 +38,10 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1748662220,
+        "lastModified": 1748792178,
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "59138c7667b7970d205d6a05a8bfa2d78caa3643",
+        "rev": "5929de975bcf4c7c8d8b5ca65c8cd9ef9e44523e",
         "type": "github"
       },
       "original": {
