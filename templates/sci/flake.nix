@@ -100,14 +100,14 @@
                     suffix-LD = false;
                     hosts = {
                       python3.enable = true;
-                      m = {
+                      marimo = {
                         enable = true;
                         path = {
                           value = "${pkgs.uv}/bin/uv";
                           args = ["--add-flags" "run marimo edit"];
                         };
                       };
-                      n = {
+                      neovide = {
                         enable = true;
                         path = {
                           value = "${pkgs.neovide}/bin/neovide";
