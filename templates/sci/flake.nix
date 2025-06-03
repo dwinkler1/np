@@ -64,7 +64,7 @@
                 ];
                 quarto = with pkgs; [
                   quarto
-                ]
+                ];
               };
 
               environmentVariables = {
