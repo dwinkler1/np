@@ -1,4 +1,5 @@
-data/*
-!data/.gitkeep
+data
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 .venv
 __marimo__
