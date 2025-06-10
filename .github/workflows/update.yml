@@ -6,7 +6,22 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  lockfile:
+  lockfile1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Determinate Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Update sci_minimal flake.lock
+        uses: DeterminateSystems/update-flake-lock@v25
+        with:
+          path-to-flake-dir: "templates/sci_minimal"
+          pr-title: "Update sci_minimal flake.lock" # Title of PR to be created
+          pr-labels: |                  # Labels to be set on the PR
+            dependencies
+            automated
+  lockfile2:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -18,14 +33,6 @@ jobs:
         with:
           path-to-flake-dir: "templates/sci"
           pr-title: "Update sci flake.lock" # Title of PR to be created
-          pr-labels: |                  # Labels to be set on the PR
-            dependencies
-            automated
-      - name: Update sci_minimal flake.lock
-        uses: DeterminateSystems/update-flake-lock@v25
-        with:
-          path-to-flake-dir: "templates/sci_minimal"
-          pr-title: "Update sci_minimal flake.lock" # Title of PR to be created
           pr-labels: |                  # Labels to be set on the PR
             dependencies
             automated
