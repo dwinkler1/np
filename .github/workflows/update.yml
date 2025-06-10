@@ -16,6 +16,7 @@ jobs:
       - name: Update sci_minimal flake.lock
         uses: DeterminateSystems/update-flake-lock@v25
         with:
+          branch: update_sci_minimal
           path-to-flake-dir: "templates/sci_minimal"
           pr-title: "Update sci_minimal flake.lock" # Title of PR to be created
           pr-labels: |                  # Labels to be set on the PR
@@ -31,6 +32,7 @@ jobs:
       - name: Update sci flake.lock
         uses: DeterminateSystems/update-flake-lock@v25
         with:
+          branch: update_sci
           path-to-flake-dir: "templates/sci"
           pr-title: "Update sci flake.lock" # Title of PR to be created
           pr-labels: |                  # Labels to be set on the PR
