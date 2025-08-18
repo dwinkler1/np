@@ -26,11 +26,14 @@
     ...
   } @ inputs: let
     forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
-  in {
-    packages = forSystems (
+    defaultPackageName = "p";
+    projectConfig = forSystems (
       system: let
         inherit (nixCats) utils;
-        finalPackage = nixCats.packages.${system}.default.override (prev: {
+        inherit defaultPackageName;
+        prevPackage = nixCats.packages.${system}.default;
+        finalPackage = prevPackage.override (prev: {
+          name = "p";
           dependencyOverlays =
             prev.dependencyOverlays
             ++ [
@@ -51,6 +54,7 @@
                     data_table
                     devtools
                     janitor
+                    konfound
                     languageserver
                     quarto
                     reprex
@@ -143,7 +147,22 @@
                 ];
               };
               optionalLuaPreInit = {
-                project = [];
+                project = [
+                  ''
+                  local predicate = function(notif)
+                    if not (notif.data.source == "lsp_progress" and notif.data.client_name == "lua_ls") then
+                      return true
+                    end
+                    -- Filter out some LSP progress notifications from 'lua_ls'
+                    return notif.msg:find("Diagnosing") == nil and notif.msg:find("semantic tokens") == nil
+                  end
+                  local custom_sort = function(notif_arr)
+                    return MiniNotify.default_sort(vim.tbl_filter(predicate, notif_arr))
+                  end
+                  require("mini.notify").setup({ content = { sort = custom_sort } })
+                  vim.notify = MiniNotify.make_notify()
+                  ''
+                ];
               };
               optionalLuaAdditions = {
                 project = [
@@ -180,7 +199,6 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
-              ## p => project, n => neovim (global) from nixCats
               p = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
@@ -190,7 +208,19 @@
                   settings = {
                     suffix-path = false;
                     suffix-LD = false;
+                    # your alias may not conflict with your other packages.
+                    aliases = ["newvim"];
                     hosts = {
+                      g = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.neovide}/bin/neovide";
+                          args = [
+                            "--add-flags"
+                            "--neovim-bin ${name}"
+                          ];
+                        };
+                      };
                       m = {
                         enable = true;
                         path = {
@@ -201,7 +231,7 @@
                     };
                   };
                   categories = {
-                    julia = true;
+                    julia = false;
                     python = true;
                     r = true;
                     project = true;
@@ -214,5 +244,18 @@
       in
         utils.mkAllWithDefault finalPackage
     );
+  in {
+    packages = projectConfig;
+    devShells = forSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+    in {
+      default = pkgs.mkShell {
+        name = defaultPackageName;
+        packages = [projectConfig.${system}.default];
+        inputsFrom = [];
+        shellHook = ''
+        '';
+      };
+    });
   };
 }
