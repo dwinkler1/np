@@ -141,7 +141,7 @@
                   # Prevent uv from managing Python downloads
                   UV_PYTHON_DOWNLOADS = "never";
                   # Force uv to use nixpkgs Python interpreter
-                  UV_PYTHON = pkgs.py.interpreter;
+                  UV_PYTHON = pkgs.python.interpreter;
                 };
               };
               extraWrapperArgs = {
