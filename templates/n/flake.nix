@@ -5,6 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixCats.url = "github:dwinkler1/nixCatsConfig";
     nixCats.inputs.nixpkgs.follows = "nixpkgs";
+    ## All git packages managed per project
     "plugins-r" = {
       url = "github:R-nvim/R.nvim";
       flake = false;
@@ -103,6 +104,8 @@
               ...
             } @ packageDef: {
               lspsAndRuntimeDeps = {
+                project = with pkgs; [
+                ];
                 julia = with pkgs; [
                   julia-bin
                 ];
@@ -121,19 +124,40 @@
               };
 
               startupPlugins = {
+                project = with pkgs.vimPlugins; [
+                ];
                 gitPlugins = with pkgs.neovimPlugins; [
-                  r
+                  {
+                    plugin = r;
+                    config.lua = "vim.notify('Using project local R plugin')";
+                  }
                 ];
               };
 
               optionalPlugins = {
+                project = with pkgs.vimPlugins; [
+                ];
                 gitPlugins = with pkgs.neovimPlugins; [
                   cmp-r
                   cmp-pandoc-references
                 ];
               };
+              optionalLuaPreInit = {
+                project = [];
+              };
+              optionalLuaAdditions = {
+                project = [
+                  "vim.notify('Project loaded: ${name}')"
+                ];
+              };
+              sharedLibraries = {
+                project = {
+                };
+              };
 
               environmentVariables = {
+                project = {
+                };
                 r = {
                   R_LIBS_USER = "./.Rlibs";
                 };
@@ -144,6 +168,7 @@
                   UV_PYTHON = pkgs.python.interpreter;
                 };
               };
+
               extraWrapperArgs = {
                 python = [
                   "--unset PYTHONPATH"
@@ -179,6 +204,8 @@
                     julia = true;
                     python = true;
                     r = true;
+                    project = true;
+                    gitPlugins = true;
                   };
                 }
               );
