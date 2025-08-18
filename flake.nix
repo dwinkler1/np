@@ -1,8 +1,11 @@
 {
   description = "Project Templates";
-  outputs = {self}: 
-  {
+  outputs = {self}: {
     templates = {
+      n = {
+        path = ./templates/n;
+        description = "Minimal Development environment";
+      };
       r = {
         path = ./templates/r;
         description = "R development environment";
@@ -16,6 +19,6 @@
         description = "Scientific computing environment (Julia, Python, R) without folder structure";
       };
     };
-    defaultTemplate = self.templates.sci;
+    defaultTemplate = self.templates.n;
   };
 }
