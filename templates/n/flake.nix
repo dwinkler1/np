@@ -150,18 +150,18 @@
               optionalLuaPreInit = {
                 project = [
                   ''
-                  local predicate = function(notif)
-                    if not (notif.data.source == "lsp_progress" and notif.data.client_name == "lua_ls") then
-                      return true
+                    local predicate = function(notif)
+                      if not (notif.data.source == "lsp_progress" and notif.data.client_name == "lua_ls") then
+                        return true
+                      end
+                      -- Filter out some LSP progress notifications from 'lua_ls'
+                      return notif.msg:find("Diagnosing") == nil and notif.msg:find("semantic tokens") == nil
                     end
-                    -- Filter out some LSP progress notifications from 'lua_ls'
-                    return notif.msg:find("Diagnosing") == nil and notif.msg:find("semantic tokens") == nil
-                  end
-                  local custom_sort = function(notif_arr)
-                    return MiniNotify.default_sort(vim.tbl_filter(predicate, notif_arr))
-                  end
-                  require("mini.notify").setup({ content = { sort = custom_sort } })
-                  vim.notify = MiniNotify.make_notify()
+                    local custom_sort = function(notif_arr)
+                      return MiniNotify.default_sort(vim.tbl_filter(predicate, notif_arr))
+                    end
+                    require("mini.notify").setup({ content = { sort = custom_sort } })
+                    vim.notify = MiniNotify.make_notify()
                   ''
                 ];
               };
@@ -178,14 +178,17 @@
               environmentVariables = {
                 project = {
                 };
-                r = {
-                  R_LIBS_USER = "./.Rlibs";
+                julia = {
+                  JULIA_NUM_THREADS = "auto";
                 };
                 python = {
                   # Prevent uv from managing Python downloads
                   UV_PYTHON_DOWNLOADS = "never";
                   # Force uv to use nixpkgs Python interpreter
                   UV_PYTHON = pkgs.python.interpreter;
+                };
+                r = {
+                  R_LIBS_USER = "./.Rlibs";
                 };
               };
 
@@ -225,10 +228,31 @@
                       m = {
                         enable = true;
                         path = {
-                          value = "${pkgs.uv}/bin/uv";
+                          value = "${pkgs.marimo}/bin/marimo";
                           args = ["--add-flags" "run marimo edit"];
                         };
                       };
+                      jl = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.julia-bin}/bin/julia";
+                          args = ["--project=@."];
+                        };
+                      };
+                      python3.enable = true;
+                      r = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.rWrapper}/bin/R";
+                          args = [
+                            "--no-save"
+                            "--no-restore"
+                          ];
+                        };
+                      };
+                      node.enable = true;
+                      perl.enable = true;
+                      ruby.enable = true;
                     };
                   };
                   categories = {
