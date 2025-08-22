@@ -5,6 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixCats.url = "github:dwinkler1/nixCatsConfig";
     nixCats.inputs.nixpkgs.follows = "nixpkgs";
+    nixCats.inputs.rixpkgs.follows = "rixpkgs";
     ## All git packages managed per project
     "plugins-r" = {
       url = "github:R-nvim/R.nvim";
@@ -209,7 +210,7 @@
                     suffix-path = false;
                     suffix-LD = false;
                     # your alias may not conflict with your other packages.
-                    aliases = ["newvim"];
+                    aliases = ["pvim"];
                     hosts = {
                       g = {
                         enable = true;
