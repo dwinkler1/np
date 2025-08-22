@@ -3,38 +3,22 @@ name: update-flake-lock
 on:
   workflow_dispatch: # allows manual triggering
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 0 * *'
 
 jobs:
-  lockfile1:
+  lockfile:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install Determinate Nix
         uses: DeterminateSystems/determinate-nix-action@v3
-      - name: Update sci_minimal flake.lock
+      - name: Update n flake.lock
         uses: DeterminateSystems/update-flake-lock@v25
         with:
-          branch: update_sci_minimal
-          path-to-flake-dir: "templates/sci_minimal"
-          pr-title: "Update sci_minimal flake.lock" # Title of PR to be created
-          pr-labels: |                  # Labels to be set on the PR
-            dependencies
-            automated
-  lockfile2:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install Determinate Nix
-        uses: DeterminateSystems/determinate-nix-action@v3
-      - name: Update sci flake.lock
-        uses: DeterminateSystems/update-flake-lock@v25
-        with:
-          branch: update_sci
-          path-to-flake-dir: "templates/sci"
-          pr-title: "Update sci flake.lock" # Title of PR to be created
+          branch: update_n
+          path-to-flake-dir: "templates/n"
+          pr-title: "Update n flake.lock" # Title of PR to be created
           pr-labels: |                  # Labels to be set on the PR
             dependencies
             automated
