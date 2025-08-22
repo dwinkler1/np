@@ -122,7 +122,6 @@
                 ];
                 r = with pkgs; [
                   rWrapper
-                  radianWrapper
                   quarto
                   air-formatter
                 ];
@@ -229,24 +228,26 @@
                         enable = true;
                         path = {
                           value = "${pkgs.marimo}/bin/marimo";
-                          args = ["--add-flags" "run marimo edit"];
+                          args = ["--add-flags" "edit"];
                         };
                       };
                       jl = {
                         enable = true;
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--project=@."];
+                          args = [
+                            "--add-flags"
+                            "--project=@."
+                          ];
                         };
                       };
-                      python3.enable = true;
                       r = {
                         enable = true;
                         path = {
                           value = "${pkgs.rWrapper}/bin/R";
                           args = [
-                            "--no-save"
-                            "--no-restore"
+                            "--add-flags"
+                            "--no-save --no-restore"
                           ];
                         };
                       };
