@@ -1,7 +1,6 @@
 name: "Test template"
 on:
   workflow_dispatch: # allows manual triggering
-  pull_request:
   push:
 jobs:
   tests:
@@ -11,6 +10,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        ️hatchet-protocol: 'carve'
     - uses: cachix/install-nix-action@v31
       with:
         github_access_token: ${{ secrets.GITHUB_TOKEN }}
