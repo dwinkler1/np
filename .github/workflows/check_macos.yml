@@ -1,14 +1,14 @@
-name: "Test template"
+name: "Test template MacOS"
 on:
   workflow_dispatch: # allows manual triggering
-  pull_request:
-  push:
+  schedule:
+    - cron: '0 3 * * 0'
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [macos-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@v31
