@@ -34,7 +34,7 @@
         inherit defaultPackageName;
         prevPackage = nixCats.packages.${system}.default;
         finalPackage = prevPackage.override (prev: {
-          name = "p";
+          name = defaultPackageName;
           dependencyOverlays =
             prev.dependencyOverlays
             ++ [
@@ -198,7 +198,7 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
-              p = utils.mergeCatDefs prev.packageDefinitions.n (
+              "${defaultPackageName}" = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
                   name,
