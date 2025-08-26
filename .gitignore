@@ -1,2 +1,5 @@
 .DS_Store
 .direnv
+.python-version
+pyproject.toml
+uv.lock

@@ -80,18 +80,14 @@
               )
 
               ## Define project level Python Packages
+              ## Only use if uv should not be used
               (
                 final: prev: let
                   reqPkgs = pyPackages:
                     with pyPackages; [
-                      ipython
                       numpy
-                      optuna
                       polars
                       requests
-                      scikit-learn
-                      statsmodels
-                      xgboost
                     ];
                 in {
                   python = prev.python3.withPackages reqPkgs;
@@ -224,31 +220,62 @@
                           ];
                         };
                       };
-                      m = {
+                      m = let
+                        preHookInit = ''
+                          # Check if pyproject.toml exists
+                          if [ ! -f "pyproject.toml" ]; then
+                              echo "pyproject.toml not found. Initializing new UV project..."
+
+                              # Initialize UV project
+                              uv init
+
+                              # Check if uv init was successful
+                              if [ $? -eq 0 ]; then
+                                  echo "UV project initialized successfully."
+
+                                  # Add marimo dependency
+                                  echo "Adding marimo dependency..."
+                                  uv add marimo
+
+                                  if [ $? -eq 0 ]; then
+                                      echo "Marimo added successfully!"
+                                  else
+                                      echo "Error: Failed to add marimo dependency."
+                                      exit 1
+                                  fi
+                              else
+                                  echo "Error: Failed to initialize UV project."
+                                  exit 1
+                              fi
+                          else
+                              echo "pyproject.toml already exists. Syncing...."
+                              uv sync
+                          fi
+                        '';
+                      in {
                         enable = true;
                         path = {
-                          value = "${pkgs.marimo}/bin/marimo";
-                          args = ["--add-flags" "edit"];
+                          value = "${pkgs.uv}/bin/uv";
+                          args = [
+                            "--run"
+                            "${preHookInit}"
+                            "--add-flags"
+                            "run marimo edit"
+                          ];
                         };
                       };
                       jl = {
-                        enable = true;
+                        enable = false;
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
-                          args = [
-                            "--add-flags"
-                            "--project=@."
-                          ];
+                          args = ["--add-flags" "--project=@."];
                         };
                       };
                       r = {
                         enable = true;
                         path = {
                           value = "${pkgs.rWrapper}/bin/R";
-                          args = [
-                            "--add-flags"
-                            "--no-save --no-restore"
-                          ];
+                          args = ["--add-flags" "--no-save --no-restore"];
                         };
                       };
                       node.enable = true;
@@ -258,7 +285,7 @@
                   };
                   categories = {
                     julia = false;
-                    python = true;
+                    python = false;
                     r = true;
                     project = true;
                     gitPlugins = true;
