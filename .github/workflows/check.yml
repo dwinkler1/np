@@ -3,7 +3,7 @@ on:
   workflow_dispatch: # allows manual triggering
   push:
     paths:
-      - 'flake.lock'
+      - 'templates/n/flake.lock'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
