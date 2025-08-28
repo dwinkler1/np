@@ -156,7 +156,7 @@
         if [[ ! -d ".git" ]]; then
           git init
           git add flake.nix flake.lock
-          echo "✓ Initialized empty Git repository"
+          echo "✓ Initialized Git repository and added: flake.nix, flake.lock"
         fi
 
         # Create .gitignore
