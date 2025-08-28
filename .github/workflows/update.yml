@@ -18,9 +18,9 @@ jobs:
         uses: DeterminateSystems/update-flake-lock@v27
         with:
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
-          branch: update_n
-          path-to-flake-dir: "templates/n"
-          pr-title: "Update n flake.lock" # Title of PR to be created
+          branch: update_rde
+          path-to-flake-dir: "templates/rde"
+          pr-title: "Update RDE flake.lock" # Title of PR to be created
           pr-labels: |                  # Labels to be set on the PR
             dependencies
             automated
