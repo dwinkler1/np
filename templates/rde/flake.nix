@@ -110,7 +110,7 @@
         fi
       '';
 
-      mkDirsScript = ''
+      initProjectScript = ''
         #!/usr/bin/env bash
         set -euo pipefail
 
@@ -226,7 +226,7 @@
       '';
     in {
       initPython = prev.writeShellScriptBin "initPython" initPython;
-      mkDirs = prev.writeShellScriptBin "mkDirs" mkDirsScript;
+      initProject = prev.writeShellScriptBin "initProject" initProjectScript;
       updateDeps = prev.writeShellScriptBin "updateDeps" updateDepsScript;
     };
     forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
@@ -428,10 +428,10 @@
                         enable = config.enabledLanguages.python;
                         path.value = "${pkgs.initPython}/bin/initPython";
                       };
-                      mkDirs = {
+                      initProject = {
                         enable = true;
                         path = {
-                          value = "${pkgs.mkDirs}/bin/mkDirs";
+                          value = "${pkgs.initProject}/bin/initProject";
                         };
                       };
                       updateDeps = {
@@ -484,7 +484,7 @@
             echo "=========================================================================="
             echo "🎯  ${config.defaultPackageName} Development Environment"
             echo "---"
-            echo "📝  Run '${config.defaultPackageName}-mkDirs' to set up project structure"
+            echo "📝  Run '${config.defaultPackageName}-initProject' to set up project structure"
             echo "🔄  Run '${config.defaultPackageName}-updateDeps' to update all dependencies"
             echo "---"
             echo "🚀  Available commands:"
