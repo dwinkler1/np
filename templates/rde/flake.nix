@@ -155,6 +155,7 @@
         # Initialize git
         if [[ ! -d ".git" ]]; then
           git init
+          git add flake.nix flake.lock
           echo "✓ Initialized empty Git repository"
         fi
 
