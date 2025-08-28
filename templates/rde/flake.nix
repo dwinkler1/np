@@ -375,6 +375,7 @@
                           set -euo pipefail
                           echo "🔄 Syncing existing project..."
                           uv sync
+                          echo "🐍 Launching Marimo..."
                         '';
                       in {
                         enable = config.enabledLanguages.python;
@@ -385,6 +386,25 @@
                             "${marimoInit}"
                             "--add-flags"
                             "run marimo edit \"$@\""
+                          ];
+                        };
+                      };
+                      py = let
+                        ipythonInit = ''
+                          set -euo pipefail
+                          echo "🔄 Syncing existing project..."
+                          uv sync
+                          echo "🐍 Launching IPython..."
+                        '';
+                      in {
+                        enable = config.enabledLanguages.python;
+                        path = {
+                          value = "${pkgs.uv}/bin/uv";
+                          args = [
+                            "--run"
+                            "${ipythonInit}"
+                            "--add-flags"
+                            "run ipython \"$@\""
                           ];
                         };
                       };
@@ -447,7 +467,9 @@
           (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-m: Launch Marimo notebook")
-          "See options in flake.nix"
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Launch IPython REPL")
+          " "
+          "To adjust options run: ${config.defaultPackageName} flake.nix"
         ]);
       in
         pkgs.mkShell {
