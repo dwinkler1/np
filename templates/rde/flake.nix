@@ -38,7 +38,7 @@
       ## Enable languages
       enabledLanguages = {
         julia = false;
-        python = true;
+        python = false;
         r = false;
       };
       ## Enable packages
@@ -450,7 +450,7 @@
                         enable = config.enabledLanguages.julia;
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=." "-e" "using Pkg; Pkg.instantiate()"];
+                          args = ["--add-flags" "--project=. -e 'using Pkg; Pkg.instantiate()'"];
                         };
                       };
                       r = {
