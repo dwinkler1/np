@@ -140,7 +140,7 @@
         # Create essential files
         if [[ ! -f "README.md" ]]; then
           cat > README.md << 'EOF'
-        # $PROJECT_NAME
+        # RDE
 
         ## Project Structure
         - `data/`: Data files (gitignored)
@@ -149,14 +149,13 @@
         - `tables/`: Output tables
         - `src/`: Source code
 
-        ## Usage
-        - Julia environment: `$PROJECT_NAME-jl`
-        - Python environment: `$PROJECT_NAME-m` (Marimo)
-        - R environment: `$PROJECT_NAME-r`
-        - Neovide: `$PROJECT_NAME-g`
-        - Neovim: `$PROJECT_NAME`
-        - Update: `$PROJECT_NAME-updateDeps`
         EOF
+        fi
+
+        # Initialize git
+        if [[ ! -d ".git" ]]; then
+          git init
+          echo "✓ Initialized empty Git repository"
         fi
 
         # Create .gitignore
