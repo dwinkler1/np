@@ -7,6 +7,6 @@
         description = "Research Development Environment";
       };
     };
-    defaultTemplate = self.templates.n;
+    defaultTemplate = self.templates.rde;
   };
 }
