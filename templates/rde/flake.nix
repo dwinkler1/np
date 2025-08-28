@@ -96,7 +96,7 @@
         if [[ ! -f "pyproject.toml" ]]; then
           echo "🐍 Initializing UV project..."
           uv init
-          echo "📦 Adding ipython and marimo..."
+          echo "📦 Adding IPython and Marimo..."
           uv add ipython
           uv add marimo
           echo "--------------------------------------------------------------------------"
@@ -106,6 +106,7 @@
         else
           echo "--------------------------------------------------------------------------"
           echo "🔄 Existing Python project detected."
+          echo "📦 Ensuring IPython and Marimo are installed..."
           uv add ipython
           uv add marimo
           echo "Run '${config.defaultPackageName}-updateDeps' to update dependencies."
@@ -413,7 +414,7 @@
                           if [[ ! -f "pyproject.toml" ]]; then
                             echo "🐍 Initializing UV project..."
                             uv init
-                            echo "📦 Adding ipython..."
+                            echo "📦 Adding IPython..."
                             uv add ipython
                             echo "--------------------------------------------------------------------------"
                             echo "✅ Python project initialized!"
@@ -422,6 +423,8 @@
                           else
                             echo "--------------------------------------------------------------------------"
                             echo "🔄 Syncing existing project..."
+                            echo "📦 Ensuring IPython is installed..."
+                            uv add ipython
                             uv sync
                             echo "🐍 Launching IPython..."
                             echo "--------------------------------------------------------------------------"
