@@ -348,7 +348,7 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
-              p = utils.mergeCatDefs prev.packageDefinitions.n (
+              "${config.defaultPackageName}" = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
                   name,
