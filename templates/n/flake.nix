@@ -3,10 +3,12 @@
   inputs = {
     rixpkgs.url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-08-11.tar.gz";
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixCats.url = "github:dwinkler1/nixCatsConfig";
-    nixCats.inputs.nixpkgs.follows = "nixpkgs";
-    nixCats.inputs.rixpkgs.follows = "rixpkgs";
-    ## All git packages managed per project
+    nixCats = {
+      url = "github:dwinkler1/nixCatsConfig";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rixpkgs.follows = "rixpkgs";
+    };
+    ## Git Plugins
     "plugins-r" = {
       url = "github:R-nvim/R.nvim";
       flake = false;
@@ -26,73 +28,221 @@
     nixCats,
     ...
   } @ inputs: let
+    #######################
+    ### PROJECT CONFIG ####
+    #######################
+    ## Set options below:
+    config = rec {
+      ## Set project name
+      defaultPackageName = "p";
+      ## Enable languages
+      enabledLanguages = {
+        julia = false;
+        python = false;
+        r = false;
+      };
+      ## Enable packages
+      enabledPackages = {
+        ## Plugins loaded via flake input
+        ### Always enable when R is enabled
+        ### You can use your own R installation and just enable the plugin
+        gitPlugins = enabledLanguages.r;
+      };
+    };
+    # R packages
+    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.system};};
+    rOverlay = final: prev: let
+      reqPkgs = with final.rpkgs.rPackages; [
+        broom
+        data_table
+        janitor
+        languageserver
+        reprex
+        styler
+        tidyverse
+        (buildRPackage {
+          name = "nvimcom";
+          src = inputs.plugins-r;
+          sourceRoot = "source/nvimcom";
+          buildInputs = with prev.rpkgs; [
+            R
+            stdenv.cc.cc
+            gnumake
+          ];
+          propagatedBuildInputs = [];
+        })
+      ];
+    in {
+      quarto = final.rpkgs.quarto.override {extraRPackages = reqPkgs;};
+      rWrapper = final.rpkgs.rWrapper.override {packages = reqPkgs;};
+    };
+
+    # Python packages
+    pythonOverlay = final: prev: {
+      python = prev.python3.withPackages (pyPackages:
+        with pyPackages; [
+          requests
+        ]);
+    };
+
+    ###################################
+    ## ⬆️ BASIC CONFIG ABOVE HERE ⬆️ ##
+    ###################################
+
+    projectScriptsOverlay = final: prev: let
+      initPython = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        if [[ ! -f "pyproject.toml" ]]; then
+          echo "🐍 Initializing UV project..."
+          uv init
+          echo "📦 Adding ipython and marimo..."
+          uv add ipython
+          uv add marimo
+          echo "--------------------------------------------------------------------------"
+          echo "✅ Python project initialized!"
+          echo "--------------------------------------------------------------------------"
+        else
+          echo "--------------------------------------------------------------------------"
+          echo "🔄 Existing Python project detected."
+          echo "Run '${config.defaultPackageName}-updateDeps' to update dependencies."
+          echo "--------------------------------------------------------------------------"
+        fi
+      '';
+
+      mkDirsScript = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        PROJECT_NAME="''${1:-${config.defaultPackageName}}"
+
+        echo "🚀 Setting up project: $PROJECT_NAME"
+
+        # Create directory structure
+        directories=(
+          "data/raw"
+          "data/processed"
+          "data/interim"
+          "docs"
+          "figures"
+          "tables"
+          "src/analysis"
+          "src/data_prep"
+          "src/explore"
+          "src/utils"
+        )
+
+        for dir in "''${directories[@]}"; do
+          mkdir -p "$dir"
+          echo "✓ Created $dir/"
+        done
+
+        # Create essential files
+        if [[ ! -f "README.md" ]]; then
+          cat > README.md << 'EOF'
+        # $PROJECT_NAME
+
+        ## Project Structure
+        - `data/`: Data files (gitignored)
+        - `docs/`: Documentation
+        - `figures/`: Output figures
+        - `tables/`: Output tables
+        - `src/`: Source code
+
+        ## Usage
+        - Julia environment: `$PROJECT_NAME-jl`
+        - Python environment: `$PROJECT_NAME-m` (Marimo)
+        - R environment: `$PROJECT_NAME-r`
+        - Neovide: `$PROJECT_NAME-g`
+        - Neovim: `$PROJECT_NAME`
+        - Update: `$PROJECT_NAME-updateDeps`
+        EOF
+        fi
+
+        # Create .gitignore
+        if [[ ! -f ".gitignore" ]]; then
+          cat > .gitignore << 'EOF'
+        # Data files
+        data/
+        *.csv
+        *.docx
+        *.xlsx
+        *.parquet
+
+        # R specific
+        .Rproj.user/
+        .Rhistory
+        .RData
+        .Ruserdata
+        *.Rproj
+        .Rlibs/
+
+        # Python specific
+        __pycache__/
+        *.pyc
+        .pytest_cache/
+        .venv/
+
+        # Jupyter
+        .ipynb_checkpoints/
+
+        # IDE
+        .vscode/
+        .idea/
+
+        # OS
+        .DS_Store
+        Thumbs.db
+        EOF
+        fi
+
+        echo "✅ Project setup completed successfully!"
+      '';
+
+      updateDepsScript = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        echo "🔄 Updating project dependencies..."
+
+        if [[ -f "flake.lock" ]]; then
+          nix flake update
+          echo "✅ Flake inputs updated"
+        fi
+
+        if [[ -f "pyproject.toml" ]]; then
+          uv sync --upgrade
+          echo "✅ Python dependencies updated"
+        fi
+
+        if [[ -f "Project.toml" ]]; then
+          ${config.defaultPackageName}-jl -e "using Pkg; Pkg.update()"
+          echo "✅ Julia dependencies updated"
+        fi
+
+        echo "🎉 All dependencies updated!"
+      '';
+    in {
+      initPython = prev.writeShellScriptBin "initPython" initPython;
+      mkDirs = prev.writeShellScriptBin "mkDirs" mkDirsScript;
+      updateDeps = prev.writeShellScriptBin "updateDeps" updateDepsScript;
+    };
     forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
-    defaultPackageName = "p";
     projectConfig = forSystems (
       system: let
         inherit (nixCats) utils;
-        inherit defaultPackageName;
+        inherit (config) defaultPackageName;
         prevPackage = nixCats.packages.${system}.default;
         finalPackage = prevPackage.override (prev: {
-          name = defaultPackageName;
+          name = config.defaultPackageName;
           dependencyOverlays =
             prev.dependencyOverlays
             ++ [
               (utils.standardPluginOverlay inputs)
-              ## Pull in local rix copy
-              (final: prev: {
-                rpkgs = inputs.rixpkgs.legacyPackages.${prev.system};
-              })
-              ## Define project level R packages
-              (
-                final: prev: let
-                  reqPkgs = with prev.rpkgs.rPackages; [
-                    Hmisc
-                    Rcpp
-                    arm
-                    broom
-                    car
-                    data_table
-                    devtools
-                    janitor
-                    konfound
-                    languageserver
-                    quarto
-                    reprex
-                    styler
-                    tidyverse
-                    (buildRPackage {
-                      name = "nvimcom";
-                      src = inputs.plugins-r;
-                      sourceRoot = "source/nvimcom";
-                      buildInputs = with prev.rpkgs; [
-                        R
-                        stdenv.cc.cc
-                        gnumake
-                      ];
-                      propagatedBuildInputs = [];
-                    })
-                  ];
-                in {
-                  quarto = prev.rpkgs.quarto.override {extraRPackages = reqPkgs;};
-                  rWrapper = prev.rpkgs.rWrapper.override {packages = reqPkgs;};
-                }
-              )
-
-              ## Define project level Python Packages
-              ## Only use if uv should not be used
-              (
-                final: prev: let
-                  reqPkgs = pyPackages:
-                    with pyPackages; [
-                      numpy
-                      polars
-                      requests
-                    ];
-                in {
-                  python = prev.python3.withPackages reqPkgs;
-                }
-              )
+              rixOverlay
+              rOverlay
+              pythonOverlay
+              projectScriptsOverlay
             ];
           categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
             {
@@ -198,7 +348,7 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
-              "${defaultPackageName}" = utils.mergeCatDefs prev.packageDefinitions.n (
+              p = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
                   name,
@@ -221,61 +371,51 @@
                         };
                       };
                       m = let
-                        preHookInit = ''
-                          # Check if pyproject.toml exists
-                          if [ ! -f "pyproject.toml" ]; then
-                              echo "pyproject.toml not found. Initializing new UV project..."
-
-                              # Initialize UV project
-                              uv init
-
-                              # Check if uv init was successful
-                              if [ $? -eq 0 ]; then
-                                  echo "UV project initialized successfully."
-
-                                  # Add marimo dependency
-                                  echo "Adding marimo dependency..."
-                                  uv add marimo
-
-                                  if [ $? -eq 0 ]; then
-                                      echo "Marimo added successfully!"
-                                  else
-                                      echo "Error: Failed to add marimo dependency."
-                                      exit 1
-                                  fi
-                              else
-                                  echo "Error: Failed to initialize UV project."
-                                  exit 1
-                              fi
-                          else
-                              echo "pyproject.toml already exists. Syncing...."
-                              uv sync
-                          fi
+                        marimoInit = ''
+                          set -euo pipefail
+                          echo "🔄 Syncing existing project..."
+                          uv sync
                         '';
                       in {
-                        enable = true;
+                        enable = config.enabledLanguages.python;
                         path = {
                           value = "${pkgs.uv}/bin/uv";
                           args = [
                             "--run"
-                            "${preHookInit}"
+                            "${marimoInit}"
                             "--add-flags"
-                            "run marimo edit"
+                            "run marimo edit \"$@\""
                           ];
                         };
                       };
                       jl = {
-                        enable = false;
+                        enable = config.enabledLanguages.julia;
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=@."];
+                          args = ["--add-flags" "--project=."];
                         };
                       };
                       r = {
-                        enable = true;
+                        enable = config.enabledLanguages.r;
                         path = {
                           value = "${pkgs.rWrapper}/bin/R";
                           args = ["--add-flags" "--no-save --no-restore"];
+                        };
+                      };
+                      initPython = {
+                        enable = config.enabledLanguages.python;
+                        path.value = "${pkgs.initPython}/bin/initPython";
+                      };
+                      mkDirs = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.mkDirs}/bin/mkDirs";
+                        };
+                      };
+                      updateDeps = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.updateDeps}/bin/updateDeps";
                         };
                       };
                       node.enable = true;
@@ -284,11 +424,11 @@
                     };
                   };
                   categories = {
-                    julia = false;
-                    python = false;
-                    r = true;
+                    julia = config.enabledLanguages.julia;
+                    python = config.enabledLanguages.python;
+                    r = config.enabledLanguages.r;
                     project = true;
-                    gitPlugins = true;
+                    gitPlugins = config.enabledPackages.gitPlugins;
                   };
                 }
               );
@@ -302,13 +442,35 @@
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
-      default = pkgs.mkShell {
-        name = defaultPackageName;
-        packages = [projectConfig.${system}.default];
-        inputsFrom = [];
-        shellHook = ''
-        '';
-      };
+      default = let
+        shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
+          (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
+          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-m: Launch Marimo notebook")
+          "See options in flake.nix"
+        ]);
+      in
+        pkgs.mkShell {
+          name = config.defaultPackageName;
+          packages = [projectConfig.${system}.default];
+          inputsFrom = [];
+          shellHook = ''
+            echo ""
+            ${pkgs.lib.optionalString config.enabledLanguages.python "${config.defaultPackageName}-initPython"}
+            echo "=========================================================================="
+            echo "🎯  ${config.defaultPackageName} Development Environment"
+            echo "---"
+            echo "📝  Run '${config.defaultPackageName}-mkDirs' to set up project structure"
+            echo "🔄  Run '${config.defaultPackageName}-updateDeps' to update all dependencies"
+            echo "---"
+            echo "🚀  Available commands:"
+            echo "  - ${config.defaultPackageName}: Launch Neovim"
+            echo "  - ${config.defaultPackageName}-g: Launch Neovide"
+            echo "${shellCmds}"
+            echo "=========================================================================="
+            echo ""
+          '';
+        };
     });
   };
 }
