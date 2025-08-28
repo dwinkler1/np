@@ -133,8 +133,10 @@
         )
 
         for dir in "''${directories[@]}"; do
-          mkdir -p "$dir"
-          echo "✓ Created $dir/"
+          if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir"
+            echo "✓ Created $dir/"
+          fi
         done
 
         # Create essential files
