@@ -38,7 +38,7 @@
       ## Enable languages
       enabledLanguages = {
         julia = false;
-        python = false;
+        python = true;
         r = false;
       };
       ## Enable packages
@@ -106,6 +106,8 @@
         else
           echo "--------------------------------------------------------------------------"
           echo "🔄 Existing Python project detected."
+          uv add ipython
+          uv add marimo
           echo "Run '${config.defaultPackageName}-updateDeps' to update dependencies."
           echo "--------------------------------------------------------------------------"
         fi
@@ -376,9 +378,22 @@
                       m = let
                         marimoInit = ''
                           set -euo pipefail
-                          echo "🔄 Syncing existing project..."
-                          uv sync
-                          echo "🐍 Launching Marimo..."
+                          if [[ ! -f "pyproject.toml" ]]; then
+                            echo "🐍 Initializing UV project..."
+                            uv init
+                            echo "📦 Adding Marimo..."
+                            uv add marimo
+                            echo "--------------------------------------------------------------------------"
+                            echo "✅ Python project initialized!"
+                            echo "run 'uv add PACKAGE' to add more python packages."
+                            echo "--------------------------------------------------------------------------"
+                          else
+                            echo "--------------------------------------------------------------------------"
+                            echo "🔄 Syncing existing project..."
+                            uv sync
+                            echo "🐍 Launching Marimo..."
+                            echo "--------------------------------------------------------------------------"
+                          fi
                         '';
                       in {
                         enable = config.enabledLanguages.python;
@@ -395,9 +410,22 @@
                       py = let
                         ipythonInit = ''
                           set -euo pipefail
-                          echo "🔄 Syncing existing project..."
-                          uv sync
-                          echo "🐍 Launching IPython..."
+                          if [[ ! -f "pyproject.toml" ]]; then
+                            echo "🐍 Initializing UV project..."
+                            uv init
+                            echo "📦 Adding ipython..."
+                            uv add ipython
+                            echo "--------------------------------------------------------------------------"
+                            echo "✅ Python project initialized!"
+                            echo "run 'uv add PACKAGE' to add more python packages."
+                            echo "--------------------------------------------------------------------------"
+                          else
+                            echo "--------------------------------------------------------------------------"
+                            echo "🔄 Syncing existing project..."
+                            uv sync
+                            echo "🐍 Launching IPython..."
+                            echo "--------------------------------------------------------------------------"
+                          fi
                         '';
                       in {
                         enable = config.enabledLanguages.python;
@@ -416,6 +444,13 @@
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
                           args = ["--add-flags" "--project=."];
+                        };
+                      };
+                      initJl = {
+                        enable = config.enabledLanguages.julia;
+                        path = {
+                          value = "${pkgs.julia-bin}/bin/julia";
+                          args = ["--add-flags" "--project=." "-e" "using Pkg; Pkg.instantiate()"];
                         };
                       };
                       r = {
@@ -469,8 +504,10 @@
         shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
           (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
+          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-initJl: Init existing Julia project")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-m: Launch Marimo notebook")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Launch IPython REPL")
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
           " "
           "To adjust options run: ${config.defaultPackageName} flake.nix"
         ]);
@@ -481,7 +518,6 @@
           inputsFrom = [];
           shellHook = ''
             echo ""
-            ${pkgs.lib.optionalString config.enabledLanguages.python "${config.defaultPackageName}-initPython"}
             echo "=========================================================================="
             echo "🎯  ${config.defaultPackageName} Development Environment"
             echo "---"
