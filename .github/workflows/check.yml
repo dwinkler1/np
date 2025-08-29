@@ -25,6 +25,7 @@ jobs:
       with:
         name: rde
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
 #    - uses: DeterminateSystems/magic-nix-cache-action@main
     - run: nix build ./templates/rde
     - run: nix flake check ./templates/rde
