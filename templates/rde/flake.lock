@@ -6,9 +6,15 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "plugins-cmp-pandoc-references": "plugins-cmp-pandoc-references",
-        "plugins-cmp-r": "plugins-cmp-r",
-        "plugins-r": "plugins-r",
+        "plugins-cmp-pandoc-references": [
+          "plugins-cmp-pandoc-references"
+        ],
+        "plugins-cmp-r": [
+          "plugins-cmp-r"
+        ],
+        "plugins-r": [
+          "plugins-r"
+        ],
         "rixpkgs": [
           "rixpkgs"
         ]
@@ -74,39 +80,7 @@
         "type": "github"
       }
     },
-    "plugins-cmp-pandoc-references_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1743491695,
-        "narHash": "sha256-XsdneGNJzmRBggk8lz9JNDQYk7wbYfUAF2oZLXzFb9c=",
-        "owner": "jmbuhr",
-        "repo": "cmp-pandoc-references",
-        "rev": "130eae4f75029d6495808e0ea4b769fa1ce4c9ac",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jmbuhr",
-        "repo": "cmp-pandoc-references",
-        "type": "github"
-      }
-    },
     "plugins-cmp-r": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1746709841,
-        "narHash": "sha256-TwmLSILu1H3RyRivCQlbsgUN4dsEqO1E8Hx71N/lFws=",
-        "owner": "R-nvim",
-        "repo": "cmp-r",
-        "rev": "602f399c4efde01147cadfebcc884b7aa154f8b7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "R-nvim",
-        "repo": "cmp-r",
-        "type": "github"
-      }
-    },
-    "plugins-cmp-r_2": {
       "flake": false,
       "locked": {
         "lastModified": 1746709841,
@@ -138,22 +112,6 @@
         "type": "github"
       }
     },
-    "plugins-r_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1755532199,
-        "narHash": "sha256-mb8HCaMasPUP9JZUkH1sPrtdbhM2HMUkJEKDsRt6wTs=",
-        "owner": "R-nvim",
-        "repo": "R.nvim",
-        "rev": "fd992e1c13ad3df794a30af2e937b994bf7bf4db",
-        "type": "github"
-      },
-      "original": {
-        "owner": "R-nvim",
-        "repo": "R.nvim",
-        "type": "github"
-      }
-    },
     "rixpkgs": {
       "locked": {
         "lastModified": 1754915244,
@@ -170,9 +128,9 @@
       "inputs": {
         "nixCats": "nixCats",
         "nixpkgs": "nixpkgs",
-        "plugins-cmp-pandoc-references": "plugins-cmp-pandoc-references_2",
-        "plugins-cmp-r": "plugins-cmp-r_2",
-        "plugins-r": "plugins-r_2",
+        "plugins-cmp-pandoc-references": "plugins-cmp-pandoc-references",
+        "plugins-cmp-r": "plugins-cmp-r",
+        "plugins-r": "plugins-r",
         "rixpkgs": "rixpkgs"
       }
     }

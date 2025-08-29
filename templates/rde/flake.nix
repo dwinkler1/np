@@ -5,8 +5,13 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixCats = {
       url = "github:dwinkler1/nixCatsConfig";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rixpkgs.follows = "rixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        rixpkgs.follows = "rixpkgs";
+        plugins-cmp-pandoc-references.follows = "plugins-cmp-pandoc-references";
+        plugins-cmp-r.follows = "plugins-cmp-r";
+        plugins-r.follows = "plugins-r";
+      };
     };
     ## Git Plugins
     "plugins-r" = {
@@ -164,7 +169,7 @@
           echo "✓ Initialized Git repository and added: flake.nix, flake.lock"
         fi
         # Check if files are already staged/tracked before adding
-        if ! git diff --cached --name-only | grep -q "flake.nix\|flake.lock" && 
+        if ! git diff --cached --name-only | grep -q "flake.nix\|flake.lock" &&
            ! git ls-files --error-unmatch flake.nix flake.lock >/dev/null 2>&1; then
           echo "✓ Adding flake.nix, flake.lock to Git repository"
           git add flake.nix flake.lock
@@ -542,5 +547,15 @@
           '';
         };
     });
+  };
+  nixConfig = {
+    extra-substituters = [
+      "https://rstats-on-nix.cachix.org"
+      "https://rde.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "rstats-on-nix.cachix.org-1:vdiiVgocg6WeJrODIqdprZRUrhi1JzhBnXv7aWI6+F0="
+      "rde.cachix.org-1:yRxQYM+69N/dVER6HNWRjsjytZnJVXLS/+t/LI9d1D4="
+    ];
   };
 }
