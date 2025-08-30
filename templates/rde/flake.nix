@@ -53,9 +53,28 @@
         ### You can use your own R installation and just enable the plugin
         gitPlugins = enabledLanguages.r;
       };
+      theme = rec {
+        ## set colortheme and background here
+        ### "cyberdream", "ondeark", and "tokyonight" are pre-installed
+        colorscheme = "kanagawa";
+        background = "dark";
+        ## Add other colortheme packages and config here
+        ## The default is a best guess
+        extraColorschemePackage = rec {
+          name = colorscheme;
+          extraLua = ''
+            vim.notify("Loading ${colorscheme} with extra config...")
+            require('${name}').setup({
+              commentStyle = {italic = false},
+              keywordStyle = {italic = false},
+              theme = 'dragon'
+            })
+          '';
+          plugin = name + "-nvim";
+        };
+      };
     };
     # R packages
-    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.system};};
     rOverlay = final: prev: let
       reqPkgs = with final.rpkgs.rPackages; [
         broom
@@ -93,6 +112,20 @@
     ###################################
     ## ⬆️ BASIC CONFIG ABOVE HERE ⬆️ ##
     ###################################
+
+    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.system};};
+
+    extraPkgOverlay = final: prev: let
+      extraTheme = {
+        plugin = prev.vimPlugins."${config.theme.extraColorschemePackage.plugin}";
+        name = config.theme.extraColorschemePackage.name;
+        config = {
+          lua = config.theme.extraColorschemePackage.extraLua;
+        };
+      };
+    in {
+      inherit extraTheme;
+    };
 
     projectScriptsOverlay = final: prev: let
       initPython = ''
@@ -256,6 +289,7 @@
             prev.dependencyOverlays
             ++ [
               (utils.standardPluginOverlay inputs)
+              extraPkgOverlay
               rixOverlay
               rOverlay
               pythonOverlay
@@ -292,6 +326,7 @@
 
               startupPlugins = {
                 project = with pkgs.vimPlugins; [
+                  pkgs.extraTheme
                 ];
                 gitPlugins = with pkgs.neovimPlugins; [
                   {
@@ -516,6 +551,8 @@
                     r = config.enabledLanguages.r;
                     project = true;
                     gitPlugins = config.enabledPackages.gitPlugins;
+                    background = config.theme.background;
+                    colorscheme = config.theme.colorscheme;
                   };
                 }
               );
