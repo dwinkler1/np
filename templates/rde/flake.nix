@@ -42,7 +42,7 @@
       defaultPackageName = "p";
       ## Enable languages
       enabledLanguages = {
-        julia = false;
+        julia = true;
         python = false;
         r = false;
       };
@@ -387,7 +387,7 @@
                           ];
                         };
                       };
-                      m = let
+                      marimo = let
                         marimoInit = ''
                           set -euo pipefail
                           if [[ ! -f "pyproject.toml" ]]; then
@@ -464,7 +464,22 @@
                         enable = config.enabledLanguages.julia;
                         path = {
                           value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=. -e 'using Pkg; Pkg.instantiate()'"];
+                          args = ["--add-flags" "--project=. -e 'using Pkg; Pkg.instantiate(); Pkg.add(\"Pluto\")'"];
+                        };
+                      };
+                      pluto = let
+                        runPluto = ''
+                          import Pkg; import TOML; Pkg.instantiate();
+                          if !isfile("Project.toml") || !haskey(TOML.parsefile(Base.active_project())["deps"], "Pluto")
+                            Pkg.add("Pluto");
+                          end
+                          import Pluto; Pluto.run();
+                        '';
+                      in {
+                        enable = config.enabledLanguages.julia;
+                        path = {
+                          value = "${pkgs.julia-bin}/bin/julia";
+                          args = ["--add-flags" "--project=. -e '${runPluto}'"];
                         };
                       };
                       r = {
@@ -518,8 +533,9 @@
         shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
           (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
+          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-pluto: Launch Pluto.jl notebook")
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-initJl: Init existing Julia project")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-m: Launch Marimo notebook")
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-marimo: Launch Marimo notebook")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Launch IPython REPL")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
           " "
