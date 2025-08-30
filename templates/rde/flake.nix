@@ -1,32 +1,6 @@
 {
   description = "New Project";
-  inputs = {
-    rixpkgs.url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-08-11.tar.gz";
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixCats = {
-      url = "github:dwinkler1/nixCatsConfig";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        rixpkgs.follows = "rixpkgs";
-        plugins-cmp-pandoc-references.follows = "plugins-cmp-pandoc-references";
-        plugins-cmp-r.follows = "plugins-cmp-r";
-        plugins-r.follows = "plugins-r";
-      };
-    };
-    ## Git Plugins
-    "plugins-r" = {
-      url = "github:R-nvim/R.nvim";
-      flake = false;
-    };
-    "plugins-cmp-r" = {
-      url = "github:R-nvim/cmp-r";
-      flake = false;
-    };
-    "plugins-cmp-pandoc-references" = {
-      url = "github:jmbuhr/cmp-pandoc-references";
-      flake = false;
-    };
-  };
+
   outputs = {
     self,
     nixpkgs,
@@ -600,6 +574,33 @@
           '';
         };
     });
+  };
+  inputs = {
+    rixpkgs.url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-08-11.tar.gz";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixCats = {
+      url = "github:dwinkler1/nixCatsConfig";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        rixpkgs.follows = "rixpkgs";
+        plugins-cmp-pandoc-references.follows = "plugins-cmp-pandoc-references";
+        plugins-cmp-r.follows = "plugins-cmp-r";
+        plugins-r.follows = "plugins-r";
+      };
+    };
+    ## Git Plugins
+    "plugins-r" = {
+      url = "github:R-nvim/R.nvim";
+      flake = false;
+    };
+    "plugins-cmp-r" = {
+      url = "github:R-nvim/cmp-r";
+      flake = false;
+    };
+    "plugins-cmp-pandoc-references" = {
+      url = "github:jmbuhr/cmp-pandoc-references";
+      flake = false;
+    };
   };
   nixConfig = {
     extra-substituters = [
