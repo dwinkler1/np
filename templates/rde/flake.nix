@@ -42,7 +42,7 @@
       defaultPackageName = "p";
       ## Enable languages
       enabledLanguages = {
-        julia = true;
+        julia = false;
         python = false;
         r = false;
       };
