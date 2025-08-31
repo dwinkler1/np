@@ -508,6 +508,13 @@
                           value = "${pkgs.initProject}/bin/initProject";
                         };
                       };
+                      initDevenv = {
+                        enable = true;
+                        path = {
+                          value = "${pkgs.devenv}/bin/devenv";
+                          args = ["--add-flags" "init"];
+                        };
+                      };
                       updateDeps = {
                         enable = true;
                         path = {
@@ -556,6 +563,7 @@
         pkgs.mkShell {
           name = config.defaultPackageName;
           packages = [projectConfig.${system}.default];
+          nativeBuildInputs = with pkgs; [devenv];
           inputsFrom = [];
           shellHook = ''
             echo ""
