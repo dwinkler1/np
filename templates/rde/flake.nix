@@ -241,10 +241,13 @@
 
         echo "🔄 Updating project dependencies..."
 
-        if [[ -f "flake.lock" ]]; then
-          nix flake update
-          echo "✅ Flake inputs updated"
-        fi
+        RVER=$( wget -qO- 'https://raw.githubusercontent.com/ropensci/rix/refs/heads/main/inst/extdata/available_df.csv' | tail -n 1 | head -n 1 | cut -d',' -f4 | tr -d '"' ) &&\
+
+        sed -i  "s|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\";|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/$RVER\";|" flake.nix
+        echo "✅ R date is $RVER"
+
+        nix flake update
+        echo "✅ Flake inputs updated"
 
         if [[ -f "pyproject.toml" ]]; then
           uv sync --upgrade
@@ -637,7 +640,7 @@
     });
   };
   inputs = {
-    rixpkgs.url = "https://github.com/rstats-on-nix/nixpkgs/archive/2025-08-11.tar.gz";
+    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2025-08-25";
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixCats = {
       url = "github:dwinkler1/nixCatsConfig";
