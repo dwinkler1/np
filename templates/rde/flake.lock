@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "fran": {
+      "inputs": {
+        "nixpkgs": [
+          "rixpkgs"
+        ],
+        "nvimcom": [
+          "plugins-r"
+        ]
+      },
+      "locked": {
+        "lastModified": 1756709359,
+        "narHash": "sha256-CUO2ZkeND0PiHMefVQy47buPDP9KXRfXb4HRbIQUbQI=",
+        "owner": "dwinkler1",
+        "repo": "fran",
+        "rev": "416ff93fd4b78d09a31d671bce0b8e084f55e44f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dwinkler1",
+        "repo": "fran",
+        "type": "github"
+      }
+    },
     "nixCats": {
       "inputs": {
         "nixCats": "nixCats_2",
@@ -130,6 +153,7 @@
     },
     "root": {
       "inputs": {
+        "fran": "fran",
         "nixCats": "nixCats",
         "nixpkgs": "nixpkgs",
         "plugins-cmp-pandoc-references": "plugins-cmp-pandoc-references",

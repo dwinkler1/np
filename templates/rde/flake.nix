@@ -18,7 +18,7 @@
       enabledLanguages = {
         julia = false;
         python = false;
-        r = false;
+        r = true;
       };
       ## Enable packages
       enabledPackages = {
@@ -60,18 +60,10 @@
         reprex
         styler
         tidyverse
-        (buildRPackage {
-          name = "nvimcom";
-          src = inputs.plugins-r;
-          sourceRoot = "source/nvimcom";
-          buildInputs = with prev.rpkgs; [
-            R
-            stdenv.cc.cc
-            gnumake
-          ];
-          propagatedBuildInputs = [];
-        })
-      ];
+      ] ++ (with final.extraRPackages;[
+        nvimcom
+        httpgd
+      ] );
     in {
       quarto = final.rpkgs.quarto.override {extraRPackages = reqPkgs;};
       rWrapper = final.rpkgs.rWrapper.override {packages = reqPkgs;};
@@ -299,6 +291,7 @@
               (utils.standardPluginOverlay inputs)
               extraPkgOverlay
               rixOverlay
+              inputs.fran.overlays.default
               rOverlay
               pythonOverlay
               projectScriptsOverlay
@@ -647,9 +640,18 @@
       inputs = {
         nixpkgs.follows = "nixpkgs";
         rixpkgs.follows = "rixpkgs";
+        fran.follows = "fran";
         plugins-cmp-pandoc-references.follows = "plugins-cmp-pandoc-references";
         plugins-cmp-r.follows = "plugins-cmp-r";
         plugins-r.follows = "plugins-r";
+      };
+    };
+    ## Extra R packages
+    fran = {
+      url = "github:dwinkler1/fran";
+      inputs = {
+        nixpkgs.follows = "rixpkgs";
+        nvimcom.follows = "plugins-r";
       };
     };
     ## Git Plugins
