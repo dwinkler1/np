@@ -26,6 +26,8 @@
         ### Always enable when R is enabled
         ### You can use your own R installation and just enable the plugin
         gitPlugins = enabledLanguages.r;
+        ## Create additional dev shells in the project
+        devenv = false;
       };
       theme = rec {
         ## set colortheme and background here
@@ -217,6 +219,16 @@
         # OS
         .DS_Store
         Thumbs.db
+
+        # Devenv
+        .devenv*
+        devenv.local.nix
+
+        # direnv
+        .direnv
+
+        # pre-commit
+        .pre-commit-config.yaml
         EOF
         fi
 
@@ -244,12 +256,31 @@
           echo "✅ Julia dependencies updated"
         fi
 
+        if [[ -f "devenv.nix" ]]; then
+          devenv update
+          echo "✅ Devenv dependencies updated"
+        fi
+
         echo "🎉 All dependencies updated!"
+      '';
+
+      activateDevenv = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        if [[ -f "devenv.nix" ]]; then
+          echo "🚀 Activating devenv environment..."
+          exec ${config.defaultPackageName}-devenv shell
+        else
+          echo "❌ No devenv.nix file found in the current directory."
+          echo "To create one, run '${config.defaultPackageName}-initDevenv'"
+          exit 1
+        fi
       '';
     in {
       initPython = prev.writeShellScriptBin "initPython" initPython;
       initProject = prev.writeShellScriptBin "initProject" initProjectScript;
       updateDeps = prev.writeShellScriptBin "updateDeps" updateDepsScript;
+      activateDevenv = prev.writeShellScriptBin "activateDevenv" activateDevenv;
     };
     forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
     projectConfig = forSystems (
@@ -509,10 +540,22 @@
                         };
                       };
                       initDevenv = {
-                        enable = true;
+                        enable = config.enabledPackages.devenv;
                         path = {
                           value = "${pkgs.devenv}/bin/devenv";
                           args = ["--add-flags" "init"];
+                        };
+                      };
+                      activateDevenv = {
+                        enable = config.enabledPackages.devenv;
+                        path = {
+                          value = "${pkgs.activateDevenv}/bin/activateDevenv";
+                        };
+                      };
+                      devenv = {
+                        enable = config.enabledPackages.devenv;
+                        path = {
+                          value = "${pkgs.devenv}/bin/devenv";
                         };
                       };
                       updateDeps = {
@@ -556,6 +599,8 @@
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-marimo: Launch Marimo notebook")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Launch IPython REPL")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
+          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-initDevenv: Init devenv project")
+          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-devenv: Run devenv")
           " "
           "To adjust options run: ${config.defaultPackageName} flake.nix"
         ]);
@@ -563,7 +608,6 @@
         pkgs.mkShell {
           name = config.defaultPackageName;
           packages = [projectConfig.${system}.default];
-          nativeBuildInputs = with pkgs; [devenv];
           inputsFrom = [];
           shellHook = ''
             echo ""
@@ -578,6 +622,8 @@
             echo "  - ${config.defaultPackageName}-g: Launch Neovide"
             echo "${shellCmds}"
             echo "=========================================================================="
+            echo ""
+            ${pkgs.lib.optionalString config.enabledPackages.devenv "${config.defaultPackageName}-activateDevenv"}
             echo ""
           '';
         };
