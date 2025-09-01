@@ -1,0 +1,7 @@
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/.devenv/flake.json
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/.devenv.flake.nix
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/.env
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/devenv.local.nix
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/devenv.lock
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/devenv.nix
+/Users/daniel/_work_system/10_19_development/13_configs/13.05_project_template/templates/rde/devenv.yaml
