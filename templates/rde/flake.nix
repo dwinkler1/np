@@ -52,18 +52,21 @@
     };
     # R packages
     rOverlay = final: prev: let
-      reqPkgs = with final.rpkgs.rPackages; [
-        broom
-        data_table
-        janitor
-        languageserver
-        reprex
-        styler
-        tidyverse
-      ] ++ (with final.extraRPackages;[
-        nvimcom
-        httpgd
-      ] );
+      reqPkgs = with final.rpkgs.rPackages;
+        [
+          broom
+          data_table
+          janitor
+          languageserver
+          reprex
+          styler
+          tidyverse
+        ]
+        ++ (with final.extraRPackages; [
+          nvimcom
+          httpgd
+        ])
+        ++ (prev.lib.optional (builtins.pathExists ./r-packages.nix) (import ./r-packages.nix final.rpkgs));
     in {
       quarto = final.rpkgs.quarto.override {extraRPackages = reqPkgs;};
       rWrapper = final.rpkgs.rWrapper.override {packages = reqPkgs;};
