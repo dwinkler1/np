@@ -31,7 +31,7 @@
       };
       theme = rec {
         ## set colortheme and background here
-        ### "cyberdream", "ondeark", and "tokyonight" are pre-installed
+        ### "cyberdream", "onedark", and "tokyonight" are pre-installed
         colorscheme = "kanagawa";
         background = "dark";
         ## Add other colortheme packages and config here
@@ -319,7 +319,7 @@
                 python = with pkgs; [
                   python
                   nodejs
-                  pyright
+                  basedpyright
                   uv
                 ];
                 r = with pkgs; [
@@ -459,7 +459,13 @@
                           ];
                         };
                       };
-                      py = let
+                      py = {
+                        enable = config.enabledLanguages.python;
+                        path = {
+                          value = "${pkgs.python.interpreter}";
+                        };
+                      };
+                      ipy = let
                         ipythonInit = ''
                           set -euo pipefail
                           if [[ ! -f "pyproject.toml" ]]; then
@@ -597,7 +603,8 @@
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-pluto: Launch Pluto.jl notebook")
           (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-initJl: Init existing Julia project")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-marimo: Launch Marimo notebook")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Launch IPython REPL")
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Run python")
+          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-ipy: Launch IPython REPL")
           (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
           (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-initDevenv: Init devenv project")
           (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-devenv: Run devenv")

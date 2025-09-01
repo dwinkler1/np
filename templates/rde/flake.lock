@@ -20,11 +20,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1756689834,
-        "narHash": "sha256-U0+MEMsvR4DNv7zKi/3kPt4NvSvYcUCMwfMTblqNIec=",
+        "lastModified": 1756702034,
+        "narHash": "sha256-BQdMiFEL6z7IbhN+Jb700LDs4C48fTvZ4xxcXZ5EfJ8=",
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "fb459451e290fa0a31d7fb096209993a8b18b765",
+        "rev": "9c31108d0d03489d58c6724badae17af4f63ecf3",
         "type": "github"
       },
       "original": {
