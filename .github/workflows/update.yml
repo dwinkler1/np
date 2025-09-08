@@ -11,9 +11,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-      - name: Install Determinate Nix
-        uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: wimpysworld/nothing-but-nix@main
+        with:
+          hatchet-protocol: 'carve'
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v14
+        with:
+          name: rde
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: rstats-on-nix, nix-community
       - run: cd templates/rde/ && nix develop -c p-updateDeps
       - name: Update n flake.lock
         uses: DeterminateSystems/update-flake-lock@v27
