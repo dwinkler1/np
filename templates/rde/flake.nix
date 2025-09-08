@@ -280,7 +280,12 @@
       updateDeps = prev.writeShellScriptBin "updateDeps" updateDepsScript;
       activateDevenv = prev.writeShellScriptBin "activateDevenv" activateDevenv;
     };
-    forSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
+    supportedSystems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "aarch64-darwin"
+    ];
+    forSystems = nixpkgs.lib.genAttrs supportedSystems;
     projectConfig = forSystems (
       system: let
         inherit (nixCats) utils;
