@@ -10,11 +10,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1757216868,
-        "narHash": "sha256-t2X8jsj3CoitdOcEzw/oZHe21OUetWFAojAXBAaHYGw=",
+        "lastModified": 1757494158,
+        "narHash": "sha256-JzUbNx8gXBoIO394TZBUQ8IOCaqwHFls3xF/a+prwY4=",
         "owner": "dwinkler1",
         "repo": "fran",
-        "rev": "647b4655991e45ecacdebd2f668dc064979da7e7",
+        "rev": "01956fa8a7021c6e4d49abbad0a8f4ae34678145",
         "type": "github"
       },
       "original": {
@@ -46,11 +46,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1757301561,
-        "narHash": "sha256-gj+WQJp8uhKUkPlOyUxeWEr3LiZTuRjSHWGYh7XSvKg=",
+        "lastModified": 1757477301,
+        "narHash": "sha256-9noDmt0EKkwZNlZJPJKcZeRjp1snnDNs08qvWc2BIEA=",
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "8e76e2124c4645d21ba2477ed7c5bcb1f3d318e8",
+        "rev": "d6900fa06b35c3714ff2ccdd84f6ee8dae387086",
         "type": "github"
       },
       "original": {
@@ -140,16 +140,16 @@
     },
     "rixpkgs": {
       "locked": {
-        "lastModified": 1756729913,
-        "narHash": "sha256-3pyl4lIhkKEHv3DOUpi361BpsWR7xAxF6viHhTjLqaI=",
+        "lastModified": 1757420984,
+        "narHash": "sha256-orE5uv9px+mJzws9jwxZyps1KRrgJ1EUDB6uF4v5zto=",
         "owner": "rstats-on-nix",
         "repo": "nixpkgs",
-        "rev": "7aec61a157c33f3bc0907b161b20516232925186",
+        "rev": "474f654d6856bf0cb86dbcf740d18e0e637aa30e",
         "type": "github"
       },
       "original": {
         "owner": "rstats-on-nix",
-        "ref": "2025-09-01",
+        "ref": "2025-09-09",
         "repo": "nixpkgs",
         "type": "github"
       }
