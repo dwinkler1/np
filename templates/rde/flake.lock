@@ -46,11 +46,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1758349055,
-        "narHash": "sha256-O1qh0F61A/ddGEA4+30ZSmTtay7KNxnyrRBkgC56aaU=",
+        "lastModified": 1758549352,
+        "narHash": "sha256-mruOgVuZmGOMFzTr5hK7OiSQxUIOgKh2Uh6rrig8Rq8=",
         "owner": "dwinkler1",
         "repo": "nixCatsConfig",
-        "rev": "5840d45dff48a569e19989c916b133a9282f2952",
+        "rev": "227bbb299d9e2ce1a088fcf58d5426b798a925f0",
         "type": "github"
       },
       "original": {
@@ -61,11 +61,11 @@
     },
     "nixCats_2": {
       "locked": {
-        "lastModified": 1757949877,
-        "narHash": "sha256-HmMC/kLT/m6gZNKlJrn32ACYyrKhWD8SnU4laiWPRkc=",
+        "lastModified": 1758545673,
+        "narHash": "sha256-MMcEImF7vHqImzrdRlSFCbzGq0ebi/5eSYwypNGr+AA=",
         "owner": "BirdeeHub",
         "repo": "nixCats-nvim",
-        "rev": "2ac30eb4e65e03ce711aceba964215a79f562ccf",
+        "rev": "91f9a4b4605cc3aed835e180eb58a5bd73236407",
         "type": "github"
       },
       "original": {
@@ -125,11 +125,11 @@
     "plugins-r": {
       "flake": false,
       "locked": {
-        "lastModified": 1758401342,
-        "narHash": "sha256-NPVnDL6DkI3Fs4T52S0iuy8oqDb+cgGpRosl2GfJfbQ=",
+        "lastModified": 1758555497,
+        "narHash": "sha256-NT56UwOF4/F7uhEAMr9S48ito8FP+pDphKK4NF0iGAg=",
         "owner": "R-nvim",
         "repo": "R.nvim",
-        "rev": "964afe4f0465a2a2654142a91d9f968d1455ab74",
+        "rev": "bc903b220b27135e1b550db289fc3bcd4878116b",
         "type": "github"
       },
       "original": {
@@ -140,16 +140,16 @@
     },
     "rixpkgs": {
       "locked": {
-        "lastModified": 1758025657,
-        "narHash": "sha256-AWOon8UnnuQu/8wJEIKOHqo7Ehtp6ldUEJnA7dtZh1M=",
+        "lastModified": 1758544366,
+        "narHash": "sha256-E4axZcxc3GF4zu9HZvzfsc+5C592TlXfMyWU4OUsey0=",
         "owner": "rstats-on-nix",
         "repo": "nixpkgs",
-        "rev": "7d0db2d40303eb5c4d4aa1c5eb291e837bf420b9",
+        "rev": "ca6ec973f278000cd777f77fce0b0a4e6995319e",
         "type": "github"
       },
       "original": {
         "owner": "rstats-on-nix",
-        "ref": "2025-09-16",
+        "ref": "2025-09-22",
         "repo": "nixpkgs",
         "type": "github"
       }
