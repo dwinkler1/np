@@ -24,7 +24,7 @@ jobs:
           extraPullNames: rstats-on-nix, nix-community
       - run: cd templates/rde/ && nix develop -c p-updateDeps
       - name: Update n flake.lock
-        uses: DeterminateSystems/update-flake-lock@v27
+        uses: DeterminateSystems/update-flake-lock@v28
         with:
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
           branch: update_rde
