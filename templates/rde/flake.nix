@@ -63,7 +63,6 @@
           tidyverse
         ]
         ++ (with final.extraRPackages; [
-          nvimcom
           httpgd
         ])
         ++ (prev.lib.optional (builtins.pathExists ./r-packages.nix) (import ./r-packages.nix final.rpkgs));
@@ -664,7 +663,7 @@
     };
     ## Git Plugins
     "plugins-r" = {
-      url = "github:R-nvim/R.nvim";
+      url = "github:R-nvim/R.nvim/b40fca202f26be4c83875dae489c655f2b834df6";
       flake = false;
     };
     "plugins-cmp-r" = {
