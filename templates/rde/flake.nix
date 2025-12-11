@@ -83,7 +83,7 @@
     ## ⬆️ BASIC CONFIG ABOVE HERE ⬆️ ##
     ###################################
 
-    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.system};};
+    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.stdenv.hostPlatform.system};};
 
     extraPkgOverlay = final: prev: let
       extraTheme = {
@@ -640,8 +640,8 @@
     });
   };
   inputs = {
-    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2025-09-29";
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2025-11-10";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixCats = {
       url = "github:dwinkler1/nixCatsConfig";
       inputs = {
@@ -663,7 +663,7 @@
     };
     ## Git Plugins
     "plugins-r" = {
-      url = "github:R-nvim/R.nvim/b40fca202f26be4c83875dae489c655f2b834df6";
+      url = "github:R-nvim/R.nvim/v0.99.1";
       flake = false;
     };
     "plugins-cmp-r" = {
