@@ -91,8 +91,8 @@ jobs:
     
     - name: Test p-initProject creates project structure
       run: |
-        mkdir -p /tmp/test-project
-        cd /tmp/test-project
+        TEST_DIR=$(mktemp -d)
+        cd "$TEST_DIR"
         nix develop $GITHUB_WORKSPACE/templates/rde --command bash -c "p-initProject"
         # Verify directories were created
         test -d data/raw || exit 1
@@ -101,6 +101,8 @@ jobs:
         test -f README.md || exit 1
         test -f .gitignore || exit 1
         echo "Project structure created successfully"
+        # Cleanup
+        rm -rf "$TEST_DIR"
     
     - name: Test p-updateDeps command is available
       run: |
@@ -132,40 +134,41 @@ jobs:
     # Create a temporary directory with Python enabled
     - name: Setup test directory with Python enabled
       run: |
-        mkdir -p /tmp/test-python
-        cp -r templates/rde/. /tmp/test-python/
-        cd /tmp/test-python
-        # Enable Python in the config
-        sed -i 's/python = false;/python = true;/' flake.nix
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/rde/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable Python in the config (handle variations in whitespace)
+        sed -i 's/python[[:space:]]*=[[:space:]]*false;/python = true;/' flake.nix
+        echo "TEST_PYTHON_DIR=$TEST_DIR" >> $GITHUB_ENV
     
     - name: Build with Python enabled
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix build
     
     - name: Test Python commands are available
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "which p-py && which p-ipy && which p-initPython"
     
     - name: Test Python launches
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "p-py --version"
     
     - name: Test Python can execute code
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "p-py -c 'print(1+1)'"
     
     - name: Test UV package manager is available
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "uv --version"
     
     - name: Test basedpyright LSP is available
       run: |
-        cd /tmp/test-python
+        cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "basedpyright --version"
   
   test-with-julia:
@@ -187,28 +190,29 @@ jobs:
     # Create a temporary directory with Julia enabled
     - name: Setup test directory with Julia enabled
       run: |
-        mkdir -p /tmp/test-julia
-        cp -r templates/rde/. /tmp/test-julia/
-        cd /tmp/test-julia
-        # Enable Julia in the config
-        sed -i 's/julia = false;/julia = true;/' flake.nix
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/rde/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable Julia in the config (handle variations in whitespace)
+        sed -i 's/julia[[:space:]]*=[[:space:]]*false;/julia = true;/' flake.nix
+        echo "TEST_JULIA_DIR=$TEST_DIR" >> $GITHUB_ENV
     
     - name: Build with Julia enabled
       run: |
-        cd /tmp/test-julia
+        cd "$TEST_JULIA_DIR"
         nix build
     
     - name: Test Julia commands are available
       run: |
-        cd /tmp/test-julia
+        cd "$TEST_JULIA_DIR"
         nix develop --command bash -c "which p-jl && which p-initJl"
     
     - name: Test Julia launches
       run: |
-        cd /tmp/test-julia
+        cd "$TEST_JULIA_DIR"
         nix develop --command bash -c "p-jl --version"
     
     - name: Test Julia can execute code
       run: |
-        cd /tmp/test-julia
+        cd "$TEST_JULIA_DIR"
         nix develop --command bash -c "p-jl -e 'println(1+1)'"
