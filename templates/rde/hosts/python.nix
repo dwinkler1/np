@@ -1,5 +1,23 @@
 # Python-related host configurations
+#
+# This module defines all Python-related commands available in the dev shell.
+# Each command is configured with enable conditions and execution paths.
+#
+# Available commands (when Python is enabled):
+#   - <name>-marimo: Launch Marimo notebook (interactive Python notebooks)
+#   - <name>-py: Run Python interpreter
+#   - <name>-ipy: Launch IPython REPL (enhanced interactive shell)
+#   - <name>-initPython: Initialize Python project with uv
+#
+# How it works:
+#   - Commands are enabled based on config.enabledLanguages.python
+#   - UV (Python package manager) handles project dependencies
+#   - Each command auto-initializes project if pyproject.toml doesn't exist
+#
+# Dependencies: uv, python, nodejs, basedpyright (configured in flake.nix)
 config: pkgs: {
+  # Marimo: Interactive notebook environment for Python
+  # Auto-initializes UV project and installs marimo on first run
   marimo = let
     marimoInit = ''
       set -euo pipefail
@@ -33,6 +51,8 @@ config: pkgs: {
     };
   };
 
+  # py: Standard Python interpreter
+  # Direct access to Python REPL for quick experiments
   py = {
     enable = config.enabledLanguages.python;
     path = {
@@ -40,6 +60,9 @@ config: pkgs: {
     };
   };
 
+  # ipy: IPython - Enhanced interactive Python shell
+  # Features: syntax highlighting, tab completion, magic commands
+  # Auto-initializes UV project and installs IPython on first run
   ipy = let
     ipythonInit = ''
       set -euo pipefail
@@ -75,6 +98,9 @@ config: pkgs: {
     };
   };
 
+  # initPython: Initialize Python project
+  # Creates pyproject.toml and adds IPython and Marimo
+  # Use this to set up Python tooling in an existing project
   initPython = {
     enable = config.enabledLanguages.python;
     path.value = "${pkgs.initPython}/bin/initPython";

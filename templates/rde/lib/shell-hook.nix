@@ -1,8 +1,27 @@
 # Shell hook configuration
+#
+# This module generates the welcome message displayed when entering the dev shell.
+# It provides information about available commands and how to get started.
+#
+# The message includes:
+#   - Project name and welcome banner
+#   - Quick start instructions (initProject, updateDeps)
+#   - List of all available commands based on enabled languages
+#   - Instructions for editing configuration
+#
+# Commands are conditionally shown based on config.enabledLanguages settings.
+# This ensures users only see commands relevant to their configuration.
+#
+# Usage:
+#   Imported in flake.nix as:
+#   shellHook = import ./lib/shell-hook.nix config pkgs;
+#
 # Generates the help message displayed when entering the dev shell
 config: pkgs: let
   inherit (config) defaultPackageName enabledLanguages enabledPackages;
   
+  # Build dynamic list of available commands based on enabled languages
+  # Filters out empty strings for disabled languages
   shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
     (pkgs.lib.optionalString enabledLanguages.r "  - ${defaultPackageName}-r: Launch R console")
     (pkgs.lib.optionalString enabledLanguages.julia "  - ${defaultPackageName}-jl: Launch Julia REPL")
