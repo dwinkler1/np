@@ -201,44 +201,12 @@
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
-      default = let
-        shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
-          (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-pluto: Launch Pluto.jl notebook")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-initJl: Init existing Julia project")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-marimo: Launch Marimo notebook")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Run python")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-ipy: Launch IPython REPL")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
-          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-initDevenv: Init devenv project")
-          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-devenv: Run devenv")
-          " "
-          "To adjust options run: ${config.defaultPackageName} flake.nix"
-        ]);
-      in
-        pkgs.mkShell {
-          name = config.defaultPackageName;
-          packages = [projectConfig.${system}.default];
-          inputsFrom = [];
-          shellHook = ''
-            echo ""
-            echo "=========================================================================="
-            echo "🎯  ${config.defaultPackageName} Development Environment"
-            echo "---"
-            echo "📝  Run '${config.defaultPackageName}-initProject' to set up project structure"
-            echo "🔄  Run '${config.defaultPackageName}-updateDeps' to update all dependencies"
-            echo "---"
-            echo "🚀  Available commands:"
-            echo "  - ${config.defaultPackageName}: Launch Neovim"
-            echo "  - ${config.defaultPackageName}-g: Launch Neovide"
-            echo "${shellCmds}"
-            echo "=========================================================================="
-            echo ""
-            ${pkgs.lib.optionalString config.enabledPackages.devenv "${config.defaultPackageName}-activateDevenv"}
-            echo ""
-          '';
-        };
+      default = pkgs.mkShell {
+        name = config.defaultPackageName;
+        packages = [projectConfig.${system}.default];
+        inputsFrom = [];
+        shellHook = import ./lib/shell-hook.nix config pkgs;
+      };
     });
   };
   inputs = {
