@@ -56,11 +56,13 @@
     ###################################
 
     # Import overlays from separate files
+    # Each overlay adds specific packages or configurations
     rOverlay = import ./overlays/r.nix;
     pythonOverlay = import ./overlays/python.nix;
     rixOverlay = import ./overlays/rix.nix inputs;
     extraPkgOverlay = import ./overlays/theme.nix config;
     projectScriptsOverlay = import ./overlays/project-scripts.nix config;
+    
     supportedSystems = [
       "x86_64-linux"
       "aarch64-linux"
@@ -68,6 +70,8 @@
     ];
     forSystems = nixpkgs.lib.genAttrs supportedSystems;
 
+    # Main package configuration
+    # This configures the Neovim environment with language support
     projectConfig = forSystems (
       system: let
         inherit (nixCats) utils;
@@ -97,6 +101,7 @@
               mkPlugin,
               ...
             } @ packageDef: {
+              # Language servers and runtime dependencies
               lspsAndRuntimeDeps = {
                 project = with pkgs; [];
                 julia = with pkgs; [julia-bin];
@@ -104,6 +109,7 @@
                 r = with pkgs; [rWrapper quarto air-formatter];
               };
 
+              # Plugins that load automatically
               startupPlugins = {
                 project = with pkgs.vimPlugins; [pkgs.extraTheme];
                 gitPlugins = with pkgs.neovimPlugins; [
@@ -114,6 +120,7 @@
                 ];
               };
 
+              # Plugins that load on-demand
               optionalPlugins = {
                 project = with pkgs.vimPlugins; [];
                 gitPlugins = with pkgs.neovimPlugins; [
@@ -122,25 +129,14 @@
                 ];
               };
 
+              # Lua code to run before main config
               optionalLuaPreInit = {
                 project = [
-                  ''
-                    local predicate = function(notif)
-                      if not (notif.data.source == "lsp_progress" and notif.data.client_name == "lua_ls") then
-                        return true
-                      end
-                      -- Filter out some LSP progress notifications from 'lua_ls'
-                      return notif.msg:find("Diagnosing") == nil and notif.msg:find("semantic tokens") == nil
-                    end
-                    local custom_sort = function(notif_arr)
-                      return MiniNotify.default_sort(vim.tbl_filter(predicate, notif_arr))
-                    end
-                    require("mini.notify").setup({ content = { sort = custom_sort } })
-                    vim.notify = MiniNotify.make_notify()
-                  ''
+                  (builtins.readFile ./lib/mini-notify-config.lua)
                 ];
               };
 
+              # Lua code to run after main config
               optionalLuaAdditions = {
                 project = ["vim.notify('Project loaded: ${name}')"];
               };
@@ -149,6 +145,7 @@
                 project = {};
               };
 
+              # Environment variables for each language
               environmentVariables = {
                 project = {};
                 julia = {JULIA_NUM_THREADS = "auto";};
@@ -168,6 +165,8 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
+              # Main package definition
+              # This creates the command with configured languages and tools
               "${config.defaultPackageName}" = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
@@ -178,8 +177,10 @@
                     suffix-path = false;
                     suffix-LD = false;
                     aliases = ["pvim"];
+                    # Import all host commands from hosts/ directory
                     hosts = import ./hosts config pkgs;
                   };
+                  # Enable/disable features based on config
                   categories = {
                     julia = config.enabledLanguages.julia;
                     python = config.enabledLanguages.python;
@@ -198,6 +199,7 @@
     );
   in {
     packages = projectConfig;
+    # Development shell configuration
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
@@ -205,6 +207,7 @@
         name = config.defaultPackageName;
         packages = [projectConfig.${system}.default];
         inputsFrom = [];
+        # Welcome message when entering the shell
         shellHook = import ./lib/shell-hook.nix config pkgs;
       };
     });
