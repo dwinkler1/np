@@ -67,6 +67,11 @@ jobs:
         cd templates/rde
         nix develop --command bash -c "p-r -e 'print(1+1)'"
     
+    - name: Test Quarto is available in R environment
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "quarto --version"
+    
     # Test Neovim functionality
     - name: Test Neovim command is available
       run: |
@@ -86,10 +91,9 @@ jobs:
     
     - name: Test p-initProject creates project structure
       run: |
-        cd templates/rde
         mkdir -p /tmp/test-project
         cd /tmp/test-project
-        nix develop /home/runner/work/np/np/templates/rde --command bash -c "p-initProject"
+        nix develop $GITHUB_WORKSPACE/templates/rde --command bash -c "p-initProject"
         # Verify directories were created
         test -d data/raw || exit 1
         test -d data/processed || exit 1
@@ -153,6 +157,16 @@ jobs:
       run: |
         cd /tmp/test-python
         nix develop --command bash -c "p-py -c 'print(1+1)'"
+    
+    - name: Test UV package manager is available
+      run: |
+        cd /tmp/test-python
+        nix develop --command bash -c "uv --version"
+    
+    - name: Test basedpyright LSP is available
+      run: |
+        cd /tmp/test-python
+        nix develop --command bash -c "basedpyright --version"
   
   test-with-julia:
     runs-on: ubuntu-latest
