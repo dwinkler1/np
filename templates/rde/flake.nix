@@ -50,241 +50,28 @@
         };
       };
     };
-    # R packages
-    rOverlay = final: prev: let
-      reqPkgs = with final.rpkgs.rPackages;
-        [
-          broom
-          data_table
-          janitor
-          languageserver
-          reprex
-          styler
-          tidyverse
-        ]
-        ++ (with final.extraRPackages; [
-          httpgd
-        ])
-        ++ (prev.lib.optional (builtins.pathExists ./r-packages.nix) (import ./r-packages.nix final.rpkgs));
-    in {
-      quarto = final.rpkgs.quarto.override {extraRPackages = reqPkgs;};
-      rWrapper = final.rpkgs.rWrapper.override {packages = reqPkgs;};
-    };
-
-    # Python packages
-    pythonOverlay = final: prev: {
-      python = prev.python3.withPackages (pyPackages:
-        with pyPackages; [
-          requests
-        ]);
-    };
 
     ###################################
     ## ⬆️ BASIC CONFIG ABOVE HERE ⬆️ ##
     ###################################
 
-    rixOverlay = final: prev: {rpkgs = inputs.rixpkgs.legacyPackages.${prev.stdenv.hostPlatform.system};};
+    # Import overlays from separate files
+    # Each overlay adds specific packages or configurations
+    rOverlay = import ./overlays/r.nix;
+    pythonOverlay = import ./overlays/python.nix;
+    rixOverlay = import ./overlays/rix.nix inputs;
+    extraPkgOverlay = import ./overlays/theme.nix config;
+    projectScriptsOverlay = import ./overlays/project-scripts.nix config;
 
-    extraPkgOverlay = final: prev: let
-      extraTheme = {
-        plugin = prev.vimPlugins."${config.theme.extraColorschemePackage.plugin}";
-        name = config.theme.extraColorschemePackage.name;
-        config = {
-          lua = config.theme.extraColorschemePackage.extraLua;
-        };
-      };
-    in {
-      inherit extraTheme;
-    };
-
-    projectScriptsOverlay = final: prev: let
-      initPython = ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-        if [[ ! -f "pyproject.toml" ]]; then
-          echo "🐍 Initializing UV project..."
-          uv init
-          echo "📦 Adding IPython and Marimo..."
-          uv add ipython
-          uv add marimo
-          echo "--------------------------------------------------------------------------"
-          echo "✅ Python project initialized!"
-          echo "run 'uv add PACKAGE' to add more python packages."
-          echo "--------------------------------------------------------------------------"
-        else
-          echo "--------------------------------------------------------------------------"
-          echo "🔄 Existing Python project detected."
-          echo "📦 Ensuring IPython and Marimo are installed..."
-          uv add ipython
-          uv add marimo
-          echo "Run '${config.defaultPackageName}-updateDeps' to update dependencies."
-          echo "--------------------------------------------------------------------------"
-        fi
-      '';
-
-      initProjectScript = ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        PROJECT_NAME="''${1:-${config.defaultPackageName}}"
-
-        echo "🚀 Setting up project: $PROJECT_NAME"
-
-        # Create directory structure
-        directories=(
-          "data/raw"
-          "data/processed"
-          "data/interim"
-          "docs"
-          "figures"
-          "tables"
-          "src/analysis"
-          "src/data_prep"
-          "src/explore"
-          "src/utils"
-        )
-
-        for dir in "''${directories[@]}"; do
-          if [[ ! -d "$dir" ]]; then
-            mkdir -p "$dir"
-            echo "✓ Created $dir/"
-          fi
-        done
-
-        # Create essential files
-        if [[ ! -f "README.md" ]]; then
-          cat > README.md << 'EOF'
-        # RDE
-
-        ## Project Structure
-        - `data/`: Data files (gitignored)
-        - `docs/`: Documentation
-        - `figures/`: Output figures
-        - `tables/`: Output tables
-        - `src/`: Source code
-
-        EOF
-        fi
-
-        # Initialize git
-        if [[ ! -d ".git" ]]; then
-          git init
-          echo "✓ Initialized Git repository and added: flake.nix, flake.lock"
-        fi
-        # Check if files are already staged/tracked before adding
-        if ! git diff --cached --name-only | grep -q "flake.nix\|flake.lock" &&
-           ! git ls-files --error-unmatch flake.nix flake.lock >/dev/null 2>&1; then
-          echo "✓ Adding flake.nix, flake.lock to Git repository"
-          git add flake.nix flake.lock
-        else
-          echo "✓ flake.nix, flake.lock already tracked/staged in Git"
-        fi
-        # Create .gitignore
-        if [[ ! -f ".gitignore" ]]; then
-          cat > .gitignore << 'EOF'
-        # Data files
-        data/
-        *.csv
-        *.docx
-        *.xlsx
-        *.parquet
-
-        # R specific
-        .Rproj.user/
-        .Rhistory
-        .RData
-        .Ruserdata
-        *.Rproj
-        .Rlibs/
-
-        # Python specific
-        __pycache__/
-        *.pyc
-        .pytest_cache/
-        .venv/
-
-        # Jupyter
-        .ipynb_checkpoints/
-
-        # IDE
-        .vscode/
-        .idea/
-
-        # OS
-        .DS_Store
-        Thumbs.db
-
-        # Devenv
-        .devenv*
-        devenv.local.nix
-
-        # direnv
-        .direnv
-
-        # pre-commit
-        .pre-commit-config.yaml
-        EOF
-        fi
-
-        echo "✅ Project setup completed successfully!"
-      '';
-
-      updateDepsScript = ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-
-        echo "🔄 Updating project dependencies..."
-
-        RVER=$( wget -qO- 'https://raw.githubusercontent.com/ropensci/rix/refs/heads/main/inst/extdata/available_df.csv' | tail -n 1 | head -n 1 | cut -d',' -f4 | tr -d '"' ) &&\
-
-        sed -i  "s|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\";|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/$RVER\";|" flake.nix
-        echo "✅ R date is $RVER"
-
-        nix flake update
-        echo "✅ Flake inputs updated"
-
-        if [[ -f "pyproject.toml" ]]; then
-          uv sync --upgrade
-          echo "✅ Python dependencies updated"
-        fi
-
-        if [[ -f "Project.toml" ]]; then
-          ${config.defaultPackageName}-jl -e "using Pkg; Pkg.update()"
-          echo "✅ Julia dependencies updated"
-        fi
-
-        if [[ -f "devenv.nix" ]]; then
-          devenv update
-          echo "✅ Devenv dependencies updated"
-        fi
-
-        echo "🎉 All dependencies updated!"
-      '';
-
-      activateDevenv = ''
-        #!/usr/bin/env bash
-        set -euo pipefail
-        if [[ -f "devenv.nix" ]]; then
-          echo "🚀 Activating devenv environment..."
-          exec ${config.defaultPackageName}-devenv shell
-        else
-          echo "❌ No devenv.nix file found in the current directory."
-          echo "To create one, run '${config.defaultPackageName}-initDevenv'"
-          exit 1
-        fi
-      '';
-    in {
-      initPython = prev.writeShellScriptBin "initPython" initPython;
-      initProject = prev.writeShellScriptBin "initProject" initProjectScript;
-      updateDeps = prev.writeShellScriptBin "updateDeps" updateDepsScript;
-      activateDevenv = prev.writeShellScriptBin "activateDevenv" activateDevenv;
-    };
     supportedSystems = [
       "x86_64-linux"
       "aarch64-linux"
       "aarch64-darwin"
     ];
     forSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+    # Main package configuration
+    # This configures the Neovim environment with language support
     projectConfig = forSystems (
       system: let
         inherit (nixCats) utils;
@@ -303,6 +90,7 @@
               pythonOverlay
               projectScriptsOverlay
             ];
+
           categoryDefinitions = utils.mergeCatDefs prev.categoryDefinitions (
             {
               pkgs,
@@ -313,29 +101,17 @@
               mkPlugin,
               ...
             } @ packageDef: {
+              # Language servers and runtime dependencies
               lspsAndRuntimeDeps = {
-                project = with pkgs; [
-                ];
-                julia = with pkgs; [
-                  julia-bin
-                ];
-                python = with pkgs; [
-                  python
-                  nodejs
-                  basedpyright
-                  uv
-                ];
-                r = with pkgs; [
-                  rWrapper
-                  quarto
-                  air-formatter
-                ];
+                project = with pkgs; [];
+                julia = with pkgs; [julia-bin];
+                python = with pkgs; [python nodejs basedpyright uv];
+                r = with pkgs; [rWrapper quarto air-formatter];
               };
 
+              # Plugins that load automatically
               startupPlugins = {
-                project = with pkgs.vimPlugins; [
-                  pkgs.extraTheme
-                ];
+                project = with pkgs.vimPlugins; [pkgs.extraTheme];
                 gitPlugins = with pkgs.neovimPlugins; [
                   {
                     plugin = r;
@@ -344,63 +120,44 @@
                 ];
               };
 
+              # Plugins that load on-demand
               optionalPlugins = {
-                project = with pkgs.vimPlugins; [
-                ];
+                project = with pkgs.vimPlugins; [];
                 gitPlugins = with pkgs.neovimPlugins; [
                   cmp-r
                   cmp-pandoc-references
                 ];
               };
+
+              # Lua code to run before main config
               optionalLuaPreInit = {
                 project = [
-                  ''
-                    local predicate = function(notif)
-                      if not (notif.data.source == "lsp_progress" and notif.data.client_name == "lua_ls") then
-                        return true
-                      end
-                      -- Filter out some LSP progress notifications from 'lua_ls'
-                      return notif.msg:find("Diagnosing") == nil and notif.msg:find("semantic tokens") == nil
-                    end
-                    local custom_sort = function(notif_arr)
-                      return MiniNotify.default_sort(vim.tbl_filter(predicate, notif_arr))
-                    end
-                    require("mini.notify").setup({ content = { sort = custom_sort } })
-                    vim.notify = MiniNotify.make_notify()
-                  ''
+                  (builtins.readFile ./lib/mini-notify-config.lua)
                 ];
-              };
-              optionalLuaAdditions = {
-                project = [
-                  "vim.notify('Project loaded: ${name}')"
-                ];
-              };
-              sharedLibraries = {
-                project = {
-                };
               };
 
+              # Lua code to run after main config
+              optionalLuaAdditions = {
+                project = ["vim.notify('Project loaded: ${name}')"];
+              };
+
+              sharedLibraries = {
+                project = {};
+              };
+
+              # Environment variables for each language
               environmentVariables = {
-                project = {
-                };
-                julia = {
-                  JULIA_NUM_THREADS = "auto";
-                };
+                project = {};
+                julia = {JULIA_NUM_THREADS = "auto";};
                 python = {
-                  # Prevent uv from managing Python downloads
                   UV_PYTHON_DOWNLOADS = "never";
-                  # Force uv to use nixpkgs Python interpreter
                   UV_PYTHON = pkgs.python.interpreter;
                 };
-                r = {
-                  R_LIBS_USER = "./.Rlibs";
-                };
+                r = {R_LIBS_USER = "./.Rlibs";};
               };
 
               extraWrapperArgs = {
-                python = [
-                  "--unset PYTHONPATH"
-                ];
+                python = ["--unset PYTHONPATH"];
               };
             }
           );
@@ -408,6 +165,8 @@
           packageDefinitions =
             prev.packageDefinitions
             // {
+              # Main package definition
+              # This creates the command with configured languages and tools
               "${config.defaultPackageName}" = utils.mergeCatDefs prev.packageDefinitions.n (
                 {
                   pkgs,
@@ -417,167 +176,11 @@
                   settings = {
                     suffix-path = false;
                     suffix-LD = false;
-                    # your alias may not conflict with your other packages.
                     aliases = ["pvim"];
-                    hosts = {
-                      g = {
-                        enable = true;
-                        path = {
-                          value = "${pkgs.neovide}/bin/neovide";
-                          args = [
-                            "--add-flags"
-                            "--neovim-bin ${name}"
-                          ];
-                        };
-                      };
-                      marimo = let
-                        marimoInit = ''
-                          set -euo pipefail
-                          if [[ ! -f "pyproject.toml" ]]; then
-                            echo "🐍 Initializing UV project..."
-                            uv init
-                            echo "📦 Adding Marimo..."
-                            uv add marimo
-                            echo "--------------------------------------------------------------------------"
-                            echo "✅ Python project initialized!"
-                            echo "run 'uv add PACKAGE' to add more python packages."
-                            echo "--------------------------------------------------------------------------"
-                          else
-                            echo "--------------------------------------------------------------------------"
-                            echo "🔄 Syncing existing project..."
-                            uv sync
-                            echo "🐍 Launching Marimo..."
-                            echo "--------------------------------------------------------------------------"
-                          fi
-                        '';
-                      in {
-                        enable = config.enabledLanguages.python;
-                        path = {
-                          value = "${pkgs.uv}/bin/uv";
-                          args = [
-                            "--run"
-                            "${marimoInit}"
-                            "--add-flags"
-                            "run marimo edit \"$@\""
-                          ];
-                        };
-                      };
-                      py = {
-                        enable = config.enabledLanguages.python;
-                        path = {
-                          value = "${pkgs.python.interpreter}";
-                        };
-                      };
-                      ipy = let
-                        ipythonInit = ''
-                          set -euo pipefail
-                          if [[ ! -f "pyproject.toml" ]]; then
-                            echo "🐍 Initializing UV project..."
-                            uv init
-                            echo "📦 Adding IPython..."
-                            uv add ipython
-                            echo "--------------------------------------------------------------------------"
-                            echo "✅ Python project initialized!"
-                            echo "run 'uv add PACKAGE' to add more python packages."
-                            echo "--------------------------------------------------------------------------"
-                          else
-                            echo "--------------------------------------------------------------------------"
-                            echo "🔄 Syncing existing project..."
-                            echo "📦 Ensuring IPython is installed..."
-                            uv add ipython
-                            uv sync
-                            echo "🐍 Launching IPython..."
-                            echo "--------------------------------------------------------------------------"
-                          fi
-                        '';
-                      in {
-                        enable = config.enabledLanguages.python;
-                        path = {
-                          value = "${pkgs.uv}/bin/uv";
-                          args = [
-                            "--run"
-                            "${ipythonInit}"
-                            "--add-flags"
-                            "run ipython \"$@\""
-                          ];
-                        };
-                      };
-                      jl = {
-                        enable = config.enabledLanguages.julia;
-                        path = {
-                          value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=."];
-                        };
-                      };
-                      initJl = {
-                        enable = config.enabledLanguages.julia;
-                        path = {
-                          value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=. -e 'using Pkg; Pkg.instantiate(); Pkg.add(\"Pluto\")'"];
-                        };
-                      };
-                      pluto = let
-                        runPluto = ''
-                          import Pkg; import TOML; Pkg.instantiate();
-                          if !isfile("Project.toml") || !haskey(TOML.parsefile(Base.active_project())["deps"], "Pluto")
-                            Pkg.add("Pluto");
-                          end
-                          import Pluto; Pluto.run();
-                        '';
-                      in {
-                        enable = config.enabledLanguages.julia;
-                        path = {
-                          value = "${pkgs.julia-bin}/bin/julia";
-                          args = ["--add-flags" "--project=. -e '${runPluto}'"];
-                        };
-                      };
-                      r = {
-                        enable = config.enabledLanguages.r;
-                        path = {
-                          value = "${pkgs.rWrapper}/bin/R";
-                          args = ["--add-flags" "--no-save --no-restore"];
-                        };
-                      };
-                      initPython = {
-                        enable = config.enabledLanguages.python;
-                        path.value = "${pkgs.initPython}/bin/initPython";
-                      };
-                      initProject = {
-                        enable = true;
-                        path = {
-                          value = "${pkgs.initProject}/bin/initProject";
-                        };
-                      };
-                      initDevenv = {
-                        enable = config.enabledPackages.devenv;
-                        path = {
-                          value = "${pkgs.devenv}/bin/devenv";
-                          args = ["--add-flags" "init"];
-                        };
-                      };
-                      activateDevenv = {
-                        enable = config.enabledPackages.devenv;
-                        path = {
-                          value = "${pkgs.activateDevenv}/bin/activateDevenv";
-                        };
-                      };
-                      devenv = {
-                        enable = config.enabledPackages.devenv;
-                        path = {
-                          value = "${pkgs.devenv}/bin/devenv";
-                        };
-                      };
-                      updateDeps = {
-                        enable = true;
-                        path = {
-                          value = "${pkgs.updateDeps}/bin/updateDeps";
-                        };
-                      };
-                      node.enable = true;
-                      perl.enable = true;
-                      ruby.enable = true;
-                    };
+                    # Import all host commands from hosts/ directory
+                    hosts = import ./hosts config pkgs;
                   };
+                  # Enable/disable features based on config
                   categories = {
                     julia = config.enabledLanguages.julia;
                     python = config.enabledLanguages.python;
@@ -596,47 +199,17 @@
     );
   in {
     packages = projectConfig;
+    # Development shell configuration
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
     in {
-      default = let
-        shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [
-          (pkgs.lib.optionalString config.enabledLanguages.r "  - ${config.defaultPackageName}-r: Launch R console")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-jl: Launch Julia REPL")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-pluto: Launch Pluto.jl notebook")
-          (pkgs.lib.optionalString config.enabledLanguages.julia "  - ${config.defaultPackageName}-initJl: Init existing Julia project")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-marimo: Launch Marimo notebook")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-py: Run python")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-ipy: Launch IPython REPL")
-          (pkgs.lib.optionalString config.enabledLanguages.python "  - ${config.defaultPackageName}-initPython: Init python project")
-          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-initDevenv: Init devenv project")
-          (pkgs.lib.optionalString config.enabledPackages.devenv "  - ${config.defaultPackageName}-devenv: Run devenv")
-          " "
-          "To adjust options run: ${config.defaultPackageName} flake.nix"
-        ]);
-      in
-        pkgs.mkShell {
-          name = config.defaultPackageName;
-          packages = [projectConfig.${system}.default];
-          inputsFrom = [];
-          shellHook = ''
-            echo ""
-            echo "=========================================================================="
-            echo "🎯  ${config.defaultPackageName} Development Environment"
-            echo "---"
-            echo "📝  Run '${config.defaultPackageName}-initProject' to set up project structure"
-            echo "🔄  Run '${config.defaultPackageName}-updateDeps' to update all dependencies"
-            echo "---"
-            echo "🚀  Available commands:"
-            echo "  - ${config.defaultPackageName}: Launch Neovim"
-            echo "  - ${config.defaultPackageName}-g: Launch Neovide"
-            echo "${shellCmds}"
-            echo "=========================================================================="
-            echo ""
-            ${pkgs.lib.optionalString config.enabledPackages.devenv "${config.defaultPackageName}-activateDevenv"}
-            echo ""
-          '';
-        };
+      default = pkgs.mkShell {
+        name = config.defaultPackageName;
+        packages = [projectConfig.${system}.default];
+        inputsFrom = [];
+        # Welcome message when entering the shell
+        shellHook = import ./lib/shell-hook.nix config pkgs;
+      };
     });
   };
   inputs = {
