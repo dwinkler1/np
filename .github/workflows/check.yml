@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'templates/rde/flake.lock'
+      - 'templates/rde/**/*.nix'
+      - '.github/workflows/check.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -27,5 +29,163 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: rstats-on-nix, nix-community
 #    - uses: DeterminateSystems/magic-nix-cache-action@main
-    - run: nix build ./templates/rde
-    - run: nix flake check ./templates/rde
+    
+    # Build and basic checks
+    - name: Build template
+      run: nix build ./templates/rde
+    - name: Run flake check
+      run: nix flake check ./templates/rde
+    
+    # Test development shell functionality
+    - name: Test dev shell enters successfully
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "echo 'Dev shell works'"
+    
+    # Test R functionality (default enabled)
+    - name: Test R command is available
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "which p-r"
+    
+    - name: Test R launches and runs basic command
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "p-r --version"
+    
+    - name: Test R can execute simple code
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "p-r -e 'print(1+1)'"
+    
+    # Test Neovim functionality
+    - name: Test Neovim command is available
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "which p"
+    
+    - name: Test Neovim launches in headless mode
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "p --headless --version"
+    
+    # Test utility commands
+    - name: Test p-initProject command is available
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "which p-initProject"
+    
+    - name: Test p-initProject creates project structure
+      run: |
+        cd templates/rde
+        mkdir -p /tmp/test-project
+        cd /tmp/test-project
+        nix develop /home/runner/work/np/np/templates/rde --command bash -c "p-initProject"
+        # Verify directories were created
+        test -d data/raw || exit 1
+        test -d data/processed || exit 1
+        test -d src || exit 1
+        test -f README.md || exit 1
+        test -f .gitignore || exit 1
+        echo "Project structure created successfully"
+    
+    - name: Test p-updateDeps command is available
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "which p-updateDeps"
+    
+    # Test that package is built correctly
+    - name: Test default package can be run
+      run: |
+        cd templates/rde
+        nix run . -- --headless --version
+  
+  test-with-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with Python enabled
+    - name: Setup test directory with Python enabled
+      run: |
+        mkdir -p /tmp/test-python
+        cp -r templates/rde/* /tmp/test-python/
+        cd /tmp/test-python
+        # Enable Python in the config
+        sed -i 's/python = false;/python = true;/' flake.nix
+    
+    - name: Build with Python enabled
+      run: |
+        cd /tmp/test-python
+        nix build
+    
+    - name: Test Python commands are available
+      run: |
+        cd /tmp/test-python
+        nix develop --command bash -c "which p-py && which p-ipy && which p-initPython"
+    
+    - name: Test Python launches
+      run: |
+        cd /tmp/test-python
+        nix develop --command bash -c "p-py --version"
+    
+    - name: Test Python can execute code
+      run: |
+        cd /tmp/test-python
+        nix develop --command bash -c "p-py -c 'print(1+1)'"
+  
+  test-with-julia:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with Julia enabled
+    - name: Setup test directory with Julia enabled
+      run: |
+        mkdir -p /tmp/test-julia
+        cp -r templates/rde/* /tmp/test-julia/
+        cd /tmp/test-julia
+        # Enable Julia in the config
+        sed -i 's/julia = false;/julia = true;/' flake.nix
+    
+    - name: Build with Julia enabled
+      run: |
+        cd /tmp/test-julia
+        nix build
+    
+    - name: Test Julia commands are available
+      run: |
+        cd /tmp/test-julia
+        nix develop --command bash -c "which p-jl && which p-initJl"
+    
+    - name: Test Julia launches
+      run: |
+        cd /tmp/test-julia
+        nix develop --command bash -c "p-jl --version"
+    
+    - name: Test Julia can execute code
+      run: |
+        cd /tmp/test-julia
+        nix develop --command bash -c "p-jl -e 'println(1+1)'"
