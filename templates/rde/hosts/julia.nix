@@ -49,7 +49,9 @@ config: pkgs: {
   pluto = let
     runPluto = ''
       import Pkg; import TOML; Pkg.instantiate();
-      if !isfile("Project.toml") || !haskey(TOML.parsefile(Base.active_project())["deps"], "Pluto")
+      proj = isfile("Project.toml") ? TOML.parsefile(Base.active_project()) : Dict();
+      deps = get(proj, "deps", Dict());
+      if !haskey(deps, "Pluto")
         Pkg.add("Pluto");
       end
       import Pluto; Pluto.run();

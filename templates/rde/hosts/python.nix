@@ -37,17 +37,12 @@ config: pkgs: {
         echo "🐍 Launching Marimo..."
         echo "--------------------------------------------------------------------------"
       fi
+      uv run marimo edit "$@"
     '';
   in {
     enable = config.enabledLanguages.python;
     path = {
-      value = "${pkgs.uv}/bin/uv";
-      args = [
-        "--run"
-        "${marimoInit}"
-        "--add-flags"
-        "run marimo edit \"$@\""
-      ];
+      value = "${pkgs.writeShellScriptBin "marimo-wrapper" marimoInit}/bin/marimo-wrapper";
     };
   };
 
@@ -78,23 +73,16 @@ config: pkgs: {
       else
         echo "--------------------------------------------------------------------------"
         echo "🔄 Syncing existing project..."
-        echo "📦 Ensuring IPython is installed..."
-        uv add ipython
         uv sync
         echo "🐍 Launching IPython..."
         echo "--------------------------------------------------------------------------"
       fi
+      uv run ipython "$@"
     '';
   in {
     enable = config.enabledLanguages.python;
     path = {
-      value = "${pkgs.uv}/bin/uv";
-      args = [
-        "--run"
-        "${ipythonInit}"
-        "--add-flags"
-        "run ipython \"$@\""
-      ];
+      value = "${pkgs.writeShellScriptBin "ipy-wrapper" ipythonInit}/bin/ipy-wrapper";
     };
   };
 

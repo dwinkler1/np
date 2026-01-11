@@ -44,15 +44,24 @@ fi
 # Initialize git
 if [[ ! -d ".git" ]]; then
   git init
-  echo "✓ Initialized Git repository and added: flake.nix, flake.lock"
+  echo "✓ Initialized Git repository"
 fi
-# Check if files are already staged/tracked before adding
-if ! git diff --cached --name-only | grep -q "flake.nix\|flake.lock" &&
-   ! git ls-files --error-unmatch flake.nix flake.lock >/dev/null 2>&1; then
-  echo "✓ Adding flake.nix, flake.lock to Git repository"
-  git add flake.nix flake.lock
-else
-  echo "✓ flake.nix, flake.lock already tracked/staged in Git"
+
+# Check if files exist and are not already staged/tracked before adding
+if [[ -f "flake.nix" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.nix" &&
+   ! git ls-files --error-unmatch flake.nix >/dev/null 2>&1; then
+  echo "✓ Adding flake.nix to Git repository"
+  git add flake.nix
+elif [[ -f "flake.nix" ]]; then
+  echo "✓ flake.nix already tracked/staged in Git"
+fi
+
+if [[ -f "flake.lock" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.lock" &&
+   ! git ls-files --error-unmatch flake.lock >/dev/null 2>&1; then
+  echo "✓ Adding flake.lock to Git repository"
+  git add flake.lock
+elif [[ -f "flake.lock" ]]; then
+  echo "✓ flake.lock already tracked/staged in Git"
 fi
 # Create .gitignore
 if [[ ! -f ".gitignore" ]]; then
