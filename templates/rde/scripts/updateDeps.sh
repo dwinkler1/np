@@ -3,10 +3,29 @@ set -euo pipefail
 
 echo "🔄 Updating project dependencies..."
 
+# Check for required commands
+if ! command -v wget &> /dev/null; then
+  echo "❌ Error: 'wget' command not found."
+  echo "Please install wget to fetch R version information."
+  exit 1
+fi
+
+if ! command -v sed &> /dev/null; then
+  echo "❌ Error: 'sed' command not found."
+  echo "Please install sed to update flake.nix."
+  exit 1
+fi
+
+if ! command -v nix &> /dev/null; then
+  echo "❌ Error: 'nix' command not found."
+  echo "Please install Nix to update flake inputs."
+  exit 1
+fi
+
 # Ensure we're in the repository root
 if [[ ! -f "flake.nix" ]]; then
   # Try to find git root
-  if git rev-parse --show-toplevel >/dev/null 2>&1; then
+  if command -v git &> /dev/null && git rev-parse --show-toplevel >/dev/null 2>&1; then
     cd "$(git rev-parse --show-toplevel)"
     if [[ ! -f "flake.nix" ]]; then
       echo "❌ Error: flake.nix not found in repository root"

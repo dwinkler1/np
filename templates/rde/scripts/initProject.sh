@@ -43,25 +43,32 @@ fi
 
 # Initialize git
 if [[ ! -d ".git" ]]; then
-  git init
-  echo "✓ Initialized Git repository"
+  if ! command -v git &> /dev/null; then
+    echo "⚠️  Warning: 'git' command not found. Skipping git initialization."
+    echo "Install git to enable version control."
+  else
+    git init
+    echo "✓ Initialized Git repository"
+  fi
 fi
 
 # Check if files exist and are not already staged/tracked before adding
-if [[ -f "flake.nix" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.nix" &&
-   ! git ls-files --error-unmatch flake.nix >/dev/null 2>&1; then
-  echo "✓ Adding flake.nix to Git repository"
-  git add flake.nix
-elif [[ -f "flake.nix" ]]; then
-  echo "✓ flake.nix already tracked/staged in Git"
-fi
+if command -v git &> /dev/null && [[ -d ".git" ]]; then
+  if [[ -f "flake.nix" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.nix" &&
+     ! git ls-files --error-unmatch flake.nix >/dev/null 2>&1; then
+    echo "✓ Adding flake.nix to Git repository"
+    git add flake.nix
+  elif [[ -f "flake.nix" ]]; then
+    echo "✓ flake.nix already tracked/staged in Git"
+  fi
 
-if [[ -f "flake.lock" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.lock" &&
-   ! git ls-files --error-unmatch flake.lock >/dev/null 2>&1; then
-  echo "✓ Adding flake.lock to Git repository"
-  git add flake.lock
-elif [[ -f "flake.lock" ]]; then
-  echo "✓ flake.lock already tracked/staged in Git"
+  if [[ -f "flake.lock" ]] && ! git diff --cached --name-only 2>/dev/null | grep -q "flake.lock" &&
+     ! git ls-files --error-unmatch flake.lock >/dev/null 2>&1; then
+    echo "✓ Adding flake.lock to Git repository"
+    git add flake.lock
+  elif [[ -f "flake.lock" ]]; then
+    echo "✓ flake.lock already tracked/staged in Git"
+  fi
 fi
 # Create .gitignore
 if [[ ! -f ".gitignore" ]]; then

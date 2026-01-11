@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Check if uv command is available
+if ! command -v uv &> /dev/null; then
+  echo "❌ Command 'uv' not found."
+  echo "UV is required for Python project management."
+  echo "Ensure UV is properly installed in your environment."
+  exit 1
+fi
+
 if [[ ! -f "pyproject.toml" ]]; then
   echo "🐍 Initializing UV project..."
   uv init
