@@ -5,6 +5,15 @@ on:
     paths:
       - 'templates/rde/flake.lock'
       - 'templates/rde/**/*.nix'
+      - 'templates/rde/**/*.sh'
+      - 'templates/rde/**/*.lua'
+      - '.github/workflows/check.yml'
+  pull_request:
+    paths:
+      - 'templates/rde/flake.lock'
+      - 'templates/rde/**/*.nix'
+      - 'templates/rde/**/*.sh'
+      - 'templates/rde/**/*.lua'
       - '.github/workflows/check.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -120,7 +129,7 @@ jobs:
     - name: Setup test directory with Python enabled
       run: |
         mkdir -p /tmp/test-python
-        cp -r templates/rde/* /tmp/test-python/
+        cp -r templates/rde/. /tmp/test-python/
         cd /tmp/test-python
         # Enable Python in the config
         sed -i 's/python = false;/python = true;/' flake.nix
@@ -165,7 +174,7 @@ jobs:
     - name: Setup test directory with Julia enabled
       run: |
         mkdir -p /tmp/test-julia
-        cp -r templates/rde/* /tmp/test-julia/
+        cp -r templates/rde/. /tmp/test-julia/
         cd /tmp/test-julia
         # Enable Julia in the config
         sed -i 's/julia = false;/julia = true;/' flake.nix
