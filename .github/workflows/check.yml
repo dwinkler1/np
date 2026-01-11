@@ -139,6 +139,11 @@ jobs:
         cd "$TEST_DIR"
         # Enable Python in the config (handle variations in whitespace)
         sed -i 's/python[[:space:]]*=[[:space:]]*false;/python = true;/' flake.nix
+        # Verify the change was successful
+        grep -q "python[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Python in flake.nix"
+          exit 1
+        }
         echo "TEST_PYTHON_DIR=$TEST_DIR" >> $GITHUB_ENV
     
     - name: Build with Python enabled
@@ -195,6 +200,11 @@ jobs:
         cd "$TEST_DIR"
         # Enable Julia in the config (handle variations in whitespace)
         sed -i 's/julia[[:space:]]*=[[:space:]]*false;/julia = true;/' flake.nix
+        # Verify the change was successful
+        grep -q "julia[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Julia in flake.nix"
+          exit 1
+        }
         echo "TEST_JULIA_DIR=$TEST_DIR" >> $GITHUB_ENV
     
     - name: Build with Julia enabled
