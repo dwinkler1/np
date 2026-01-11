@@ -62,7 +62,7 @@
     rixOverlay = import ./overlays/rix.nix inputs;
     extraPkgOverlay = import ./overlays/theme.nix config;
     projectScriptsOverlay = import ./overlays/project-scripts.nix config;
-    
+
     supportedSystems = [
       "x86_64-linux"
       "aarch64-linux"

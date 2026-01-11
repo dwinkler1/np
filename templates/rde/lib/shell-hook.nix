@@ -19,7 +19,7 @@
 # Generates the help message displayed when entering the dev shell
 config: pkgs: let
   inherit (config) defaultPackageName enabledLanguages enabledPackages;
-  
+
   # Build dynamic list of available commands based on enabled languages
   # Filters out empty strings for disabled languages
   shellCmds = pkgs.lib.concatLines (pkgs.lib.filter (cmd: cmd != "") [

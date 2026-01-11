@@ -83,20 +83,20 @@ Edit the `config` section in `flake.nix` to customize your environment:
 config = rec {
   # Name for your project commands (e.g., myproject-r, myproject-py)
   defaultPackageName = "p";
-  
+
   # Enable/disable language support
   enabledLanguages = {
     julia = false;   # Julia with Pluto notebooks
     python = false;  # Python with uv package manager
     r = true;        # R with tidyverse and friends
   };
-  
+
   # Additional features
   enabledPackages = {
     gitPlugins = enabledLanguages.r;  # R.nvim plugin
     devenv = false;                    # Additional dev environment
   };
-  
+
   # Neovim color scheme
   theme = rec {
     colorscheme = "kanagawa";  # cyberdream, onedark, tokyonight, kanagawa

@@ -27,13 +27,13 @@ config: final: prev: let
 in {
   # Python project initialization (creates pyproject.toml, adds packages)
   initPython = prev.writeShellScriptBin "initPython" (substituteScript ../scripts/initPython.sh);
-  
+
   # Project structure setup (creates directories, git repo, .gitignore)
   initProject = prev.writeShellScriptBin "initProject" (substituteScript ../scripts/initProject.sh);
-  
+
   # Update all dependencies (R packages, Python packages, flake inputs)
   updateDeps = prev.writeShellScriptBin "updateDeps" (substituteScript ../scripts/updateDeps.sh);
-  
+
   # Activate devenv environment if devenv.nix exists
   activateDevenv = prev.writeShellScriptBin "activateDevenv" (substituteScript ../scripts/activateDevenv.sh);
 }

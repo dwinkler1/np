@@ -1,5 +1,5 @@
 # R packages overlay
-# 
+#
 # This overlay configures the R environment with essential packages for data analysis.
 # It combines packages from rstats-on-nix (rpkgs) with custom packages.
 #

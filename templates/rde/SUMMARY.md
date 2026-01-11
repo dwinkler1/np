@@ -129,14 +129,14 @@ templates/rde/
   outputs = { ... }: let
     # Clear config section
     config = { ... };
-    
+
     # Import from organized modules
     rOverlay = import ./overlays/r.nix;
     pythonOverlay = import ./overlays/python.nix;
     # ... clean imports ...
-    
+
     # Main configuration
-    projectConfig = forSystems (system: 
+    projectConfig = forSystems (system:
       # ... focused on structure, not details
 ```
 
