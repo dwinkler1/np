@@ -13,6 +13,8 @@ final: prev: let
     ++ (with final.extraRPackages; [
       httpgd
     ])
+    # Import custom R packages from project root if file exists
+    # Users can create r-packages.nix in their project to add more packages
     ++ (prev.lib.optional (builtins.pathExists ./r-packages.nix) (import ./r-packages.nix final.rpkgs));
 in {
   quarto = final.rpkgs.quarto.override {extraRPackages = reqPkgs;};

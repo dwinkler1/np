@@ -31,6 +31,7 @@ in ''
   echo "${shellCmds}"
   echo "=========================================================================="
   echo ""
+  # Auto-activate devenv shell if devenv.nix exists (can be disabled in config)
   ${pkgs.lib.optionalString enabledPackages.devenv "${defaultPackageName}-activateDevenv"}
   echo ""
 ''

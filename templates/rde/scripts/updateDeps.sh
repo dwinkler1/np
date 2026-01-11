@@ -3,8 +3,11 @@ set -euo pipefail
 
 echo "🔄 Updating project dependencies..."
 
+# Fetch latest R version from rstats-on-nix
+# This command chain: downloads CSV, extracts last line, gets 4th field (date), removes quotes
 RVER=$( wget -qO- 'https://raw.githubusercontent.com/ropensci/rix/refs/heads/main/inst/extdata/available_df.csv' | tail -n 1 | head -n 1 | cut -d',' -f4 | tr -d '"' ) &&\
 
+# Update rixpkgs date in flake.nix
 sed -i  "s|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\";|rixpkgs.url = \"github:rstats-on-nix/nixpkgs/$RVER\";|" flake.nix
 echo "✅ R date is $RVER"
 
