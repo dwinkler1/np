@@ -202,10 +202,16 @@
     # Development shell configuration
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
+      # Language-specific packages that should be available in shell
+      languagePackages = with pkgs;
+        []
+        ++ (if config.enabledLanguages.r then [quarto] else [])
+        ++ (if config.enabledLanguages.python then [uv] else [])
+        ++ (if config.enabledLanguages.julia then [] else []);
     in {
       default = pkgs.mkShell {
         name = config.defaultPackageName;
-        packages = [projectConfig.${system}.default];
+        packages = [projectConfig.${system}.default] ++ languagePackages;
         inputsFrom = [];
         # Welcome message when entering the shell
         shellHook = import ./lib/shell-hook.nix config pkgs;
