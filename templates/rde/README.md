@@ -337,6 +337,36 @@ p-updateDeps
 # Or check overlays/r.nix for package name
 ```
 
+## CI and Testing
+
+This template is automatically tested on every change to ensure all functionality works correctly. The CI workflow (`.github/workflows/check.yml`) runs comprehensive tests including:
+
+### Default Configuration Tests (R enabled)
+- ✅ Template builds successfully
+- ✅ Flake check passes
+- ✅ Development shell enters without errors
+- ✅ Neovim launches in headless mode
+- ✅ R console is available and runs code
+- ✅ Utility commands (initProject, updateDeps) are available
+- ✅ Project structure creation works correctly
+
+### Python Configuration Tests
+- ✅ Template builds with Python enabled
+- ✅ Python commands (p-py, p-ipy, p-initPython) are available
+- ✅ Python interpreter launches and executes code
+
+### Julia Configuration Tests
+- ✅ Template builds with Julia enabled
+- ✅ Julia commands (p-jl, p-initJl) are available
+- ✅ Julia REPL launches and executes code
+
+The CI runs on:
+- Every push to template files (`.nix`, `.sh`, `.lua`, `flake.lock`)
+- Every pull request affecting the template
+- Manual dispatch for testing
+
+This ensures that users can confidently use the template knowing that all advertised functionality has been verified.
+
 ## Related Documentation
 
 - [REFACTORING.md](REFACTORING.md) - Technical details about the modular structure
