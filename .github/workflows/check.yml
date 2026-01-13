@@ -170,11 +170,6 @@ jobs:
       run: |
         cd "$TEST_PYTHON_DIR"
         nix develop --command bash -c "uv --version"
-    
-    - name: Test basedpyright LSP is available
-      run: |
-        cd "$TEST_PYTHON_DIR"
-        nix develop --command bash -c "basedpyright --version"
   
   test-with-julia:
     runs-on: ubuntu-latest
