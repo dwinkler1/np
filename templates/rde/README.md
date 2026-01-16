@@ -367,11 +367,6 @@ The CI runs on:
 
 This ensures that users can confidently use the template knowing that all advertised functionality has been verified.
 
-## Related Documentation
-
-- [REFACTORING.md](REFACTORING.md) - Technical details about the modular structure
-- [SUMMARY.md](SUMMARY.md) - Metrics and comparison with original template
-
 ## Usage
 
 Use this template with:
