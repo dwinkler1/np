@@ -237,7 +237,6 @@
       url = "github:dwinkler1/fran";
       inputs = {
         nixpkgs.follows = "rixpkgs";
-        nvimcom.follows = "plugins-r";
       };
     };
     ## Git Plugins
