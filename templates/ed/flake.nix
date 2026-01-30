@@ -1,26 +1,12 @@
 {
   description = "Project Editor";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-01-26";
-    nvimConfig = {
-      url = "github:dwinkler1/nvimConfig";
-      inputs = {
-        rixpkgs.follows = "rixpkgs";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-  };
-
   outputs = {
     self,
     nixpkgs,
     nvimConfig,
     ...
   } @ inputs: let
-    systems = nixpkgs.lib.systems.flakeExposed;
-    forAllSystems = nixpkgs.lib.genAttrs systems;
     projectSettings = {pkgs}: {
       cats = {
         clickhouse = false;
@@ -103,6 +89,8 @@
       };
     };
 
+    systems = nixpkgs.lib.systems.flakeExposed;
+    forAllSystems = nixpkgs.lib.genAttrs systems;
     overlays = [inputs.nvimConfig.overlays.dependencies];
   in {
     packages = forAllSystems (system: let
@@ -123,5 +111,24 @@
         packages = [nv pkgs.updateR];
       };
     });
+  };
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-01-26";
+    fran = {
+      url = "github:dwinkler1/fran";
+      inputs = {
+        nixpkgs.follows = "rixpkgs";
+      };
+    };
+    nvimConfig = {
+      url = "github:dwinkler1/nvimConfig";
+      inputs = {
+        rixpkgs.follows = "rixpkgs";
+        nixpkgs.follows = "nixpkgs";
+        fran.follows = "fran";
+      };
+    };
   };
 }

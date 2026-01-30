@@ -3,7 +3,6 @@
     "fran": {
       "inputs": {
         "nixpkgs": [
-          "nvimConfig",
           "rixpkgs"
         ]
       },
@@ -39,7 +38,9 @@
     },
     "nvimConfig": {
       "inputs": {
-        "fran": "fran",
+        "fran": [
+          "fran"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -114,6 +115,7 @@
     },
     "root": {
       "inputs": {
+        "fran": "fran",
         "nixpkgs": "nixpkgs",
         "nvimConfig": "nvimConfig",
         "rixpkgs": "rixpkgs"
