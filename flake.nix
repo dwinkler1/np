@@ -6,7 +6,11 @@
         path = ./templates/rde;
         description = "Research Development Environment";
       };
+      ed = {
+        path = ./templates/ed;
+        description = "Simple nvim Environment";
+      };
     };
-    defaultTemplate = self.templates.rde;
+    defaultTemplate = self.templates.ed;
   };
 }
