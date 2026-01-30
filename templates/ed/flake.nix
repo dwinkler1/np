@@ -31,7 +31,7 @@
         nix = true;
         optional = false;
         python = false;
-        r = false;
+        r = true;
       };
 
       settings = let
@@ -80,6 +80,11 @@
         wrapRc = true;
       };
       binName = "vv";
+
+      env = {
+        IS_PROJECT_EDITOR = "1";
+        R_LIBS_USER = "./.nvimcom";
+      };
 
       specs.extraLua = let
         name = builtins.baseNameOf (builtins.toString ./.);

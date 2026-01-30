@@ -51,11 +51,11 @@
         "wrappers": "wrappers"
       },
       "locked": {
-        "lastModified": 1769773342,
-        "narHash": "sha256-eHU4lhLWfCTTG3Wyn1M35PHxUcY+pILoTPwvyJ3X1jI=",
+        "lastModified": 1769787248,
+        "narHash": "sha256-skscpI6AkHV93iecNah21HSVr59AEGimA51kmQ7UOtg=",
         "owner": "dwinkler1",
         "repo": "nvimConfig",
-        "rev": "8d183d78effd3d33398819f8eb2f6d673d46d4c1",
+        "rev": "f0d0d3c4ec0c0345508ac3217ec9bf999335fef4",
         "type": "github"
       },
       "original": {
