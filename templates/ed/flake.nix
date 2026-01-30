@@ -31,7 +31,7 @@
         nix = true;
         optional = false;
         python = false;
-        r = true;
+        r = false;
       };
 
       settings = let
@@ -85,6 +85,10 @@
         IS_PROJECT_EDITOR = "1";
         R_LIBS_USER = "./.nvimcom";
       };
+
+      extraPackages = with pkgs; [
+        cowsay
+      ];
 
       specs.extraLua = let
         name = builtins.baseNameOf (builtins.toString ./.);
