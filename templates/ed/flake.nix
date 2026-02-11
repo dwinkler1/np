@@ -115,7 +115,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-01-26";
+    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-02-02";
     fran = {
       url = "github:dwinkler1/fran";
       inputs = {
