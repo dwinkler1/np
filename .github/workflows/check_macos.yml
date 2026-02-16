@@ -24,3 +24,4 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: rstats-on-nix, nix-community
     - run: nix build ./templates/rde
+    - run: nix build ./templates/ed
