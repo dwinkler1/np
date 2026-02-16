@@ -1,0 +1,278 @@
+name: "Test ED template"
+on:
+  workflow_dispatch: # allows manual triggering
+  push:
+    paths:
+      - 'templates/ed/flake.lock'
+      - 'templates/ed/**/*.nix'
+      - '.github/workflows/check_ed.yml'
+  pull_request:
+    paths:
+      - 'templates/ed/flake.lock'
+      - 'templates/ed/**/*.nix'
+      - '.github/workflows/check_ed.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v6
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Build and basic checks
+    - name: Build template
+      run: nix build ./templates/ed
+    - name: Run flake check
+      run: nix flake check ./templates/ed
+    
+    # Test development shell functionality
+    - name: Test dev shell enters successfully
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "echo 'Dev shell works'"
+    
+    # Test Neovim functionality (custom binary name: vv)
+    - name: Test vv command is available
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "which vv"
+    
+    - name: Test vv launches in headless mode
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "vv --headless --version"
+    
+    # Test utility commands
+    - name: Test updateR command is available
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "which updateR"
+    
+    # Test extra packages
+    - name: Test cowsay is available
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "which cowsay"
+    
+    - name: Test cowsay works
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "cowsay 'ED template test'"
+    
+    # Test that package is built correctly
+    - name: Test default package can be run
+      run: |
+        cd templates/ed
+        nix run . -- --headless --version
+    
+    # Test Neovim configuration
+    - name: Test mini-notify plugin loads
+      run: |
+        cd templates/ed
+        # Check that the welcome notification config is present
+        nix develop --command bash -c "vv --headless -c 'lua print(vim.inspect(require(\"mini.notify\")))' -c 'quit' 2>&1 | grep -q 'table'"
+  
+  test-with-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with Python enabled
+    - name: Setup test directory with Python enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable Python in the config
+        sed -i 's/python[[:space:]]*=[[:space:]]*false;/python = true;/' flake.nix
+        # Verify the change was successful
+        grep -q "python[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Python in flake.nix"
+          exit 1
+        }
+        echo "TEST_PYTHON_DIR=$TEST_DIR" >> $GITHUB_ENV
+    
+    - name: Build with Python enabled
+      run: |
+        cd "$TEST_PYTHON_DIR"
+        nix build
+    
+    - name: Test Python packages are available
+      run: |
+        cd "$TEST_PYTHON_DIR"
+        nix develop --command bash -c "python3 -c 'import duckdb; import polars; print(\"Python packages loaded\")'"
+    
+    - name: Test Python can execute code
+      run: |
+        cd "$TEST_PYTHON_DIR"
+        nix develop --command bash -c "python3 -c 'print(1+1)'"
+  
+  test-with-r:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with R enabled
+    - name: Setup test directory with R enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable R in the config
+        sed -i 's/r[[:space:]]*=[[:space:]]*false;/r = true;/' flake.nix
+        # Verify the change was successful
+        grep -q "r[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable R in flake.nix"
+          exit 1
+        }
+        echo "TEST_R_DIR=$TEST_DIR" >> $GITHUB_ENV
+    
+    - name: Build with R enabled
+      run: |
+        cd "$TEST_R_DIR"
+        nix build
+    
+    - name: Test R launches
+      run: |
+        cd "$TEST_R_DIR"
+        nix develop --command bash -c "R --version"
+    
+    - name: Test R packages are available
+      run: |
+        cd "$TEST_R_DIR"
+        nix develop --command bash -c "R -e 'library(fixest); print(\"R package fixest loaded\")'"
+    
+    - name: Test R can execute code
+      run: |
+        cd "$TEST_R_DIR"
+        nix develop --command bash -c "R -e 'print(1+1)'"
+  
+  test-with-julia:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with Julia enabled
+    - name: Setup test directory with Julia enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable Julia in the config
+        sed -i 's/julia[[:space:]]*=[[:space:]]*false;/julia = true;/' flake.nix
+        # Verify the change was successful
+        grep -q "julia[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Julia in flake.nix"
+          exit 1
+        }
+        echo "TEST_JULIA_DIR=$TEST_DIR" >> $GITHUB_ENV
+    
+    - name: Build with Julia enabled
+      run: |
+        cd "$TEST_JULIA_DIR"
+        nix build
+    
+    - name: Test Julia launches
+      run: |
+        cd "$TEST_JULIA_DIR"
+        nix develop --command bash -c "julia --version"
+    
+    - name: Test Julia can execute code
+      run: |
+        cd "$TEST_JULIA_DIR"
+        nix develop --command bash -c "julia -e 'println(1+1)'"
+  
+  test-with-multiple-languages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: 'carve'
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v16
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+    
+    # Create a temporary directory with multiple languages enabled
+    - name: Setup test directory with all languages enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        # Enable all languages in the config
+        sed -i 's/python[[:space:]]*=[[:space:]]*false;/python = true;/' flake.nix
+        sed -i 's/r[[:space:]]*=[[:space:]]*false;/r = true;/' flake.nix
+        sed -i 's/julia[[:space:]]*=[[:space:]]*false;/julia = true;/' flake.nix
+        # Verify the changes were successful
+        grep -q "python[[:space:]]*=[[:space:]]*true;" flake.nix || exit 1
+        grep -q "r[[:space:]]*=[[:space:]]*true;" flake.nix || exit 1
+        grep -q "julia[[:space:]]*=[[:space:]]*true;" flake.nix || exit 1
+        echo "TEST_MULTI_DIR=$TEST_DIR" >> $GITHUB_ENV
+    
+    - name: Build with all languages enabled
+      run: |
+        cd "$TEST_MULTI_DIR"
+        nix build
+    
+    - name: Test all languages work together
+      run: |
+        cd "$TEST_MULTI_DIR"
+        nix develop --command bash -c "python3 --version && R --version && julia --version"
+    
+    - name: Test all language packages are available
+      run: |
+        cd "$TEST_MULTI_DIR"
+        nix develop --command bash -c "python3 -c 'import duckdb' && R -e 'library(fixest)' && julia -e 'using StatsBase'"

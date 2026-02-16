@@ -23,5 +23,23 @@ jobs:
         name: rde
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: rstats-on-nix, nix-community
-    - run: nix build ./templates/rde
-    - run: nix build ./templates/ed
+    
+    # Test RDE template
+    - name: Build RDE template
+      run: nix build ./templates/rde
+    - name: Check RDE flake
+      run: nix flake check ./templates/rde
+    - name: Test RDE dev shell
+      run: |
+        cd templates/rde
+        nix develop --command bash -c "p --headless --version"
+    
+    # Test ED template
+    - name: Build ED template
+      run: nix build ./templates/ed
+    - name: Check ED flake
+      run: nix flake check ./templates/ed
+    - name: Test ED dev shell
+      run: |
+        cd templates/ed
+        nix develop --command bash -c "vv --headless --version"
