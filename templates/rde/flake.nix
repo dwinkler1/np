@@ -219,7 +219,7 @@
     });
   };
   inputs = {
-    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-02-02";
+    rixpkgs.url = "github:rstats-on-nix/nixpkgs/2026-02-16";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixCats = {
       url = "github:dwinkler1/nixCatsConfig";
