@@ -114,7 +114,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rixpkgs.url = "github:dwinkler1/rixpkgs/nixpkgs";
     fran = {
       url = "github:dwinkler1/fran";
@@ -128,7 +128,12 @@
         rixpkgs.follows = "rixpkgs";
         nixpkgs.follows = "nixpkgs";
         fran.follows = "fran";
+        "plugins-r".follows = "plugins-r";
       };
+    };
+    "plugins-r" = {
+      url = "github:R-nvim/R.nvim/v0.99.3";
+      flake = false;
     };
   };
 }
