@@ -18,8 +18,10 @@ final: prev: let
       broom         # Tidy model outputs
       data_table    # Fast data manipulation
       janitor       # Data cleaning helpers
+      knitr         # Required by Quarto to execute R code chunks
       languageserver # LSP for IDE support
       reprex        # Reproducible examples
+      rmarkdown     # Required by Quarto for R-based rendering
       styler        # Code formatting
       tidyverse     # Data science ecosystem
     ]

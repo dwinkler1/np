@@ -185,6 +185,10 @@
                     julia = config.enabledLanguages.julia;
                     python = config.enabledLanguages.python;
                     r = config.enabledLanguages.r;
+                    # Enable markdown/quarto plugins whenever R is active so that
+                    # .qmd buffers get proper syntax highlighting and chunk
+                    # recognition via quarto-nvim and otter-nvim.
+                    markdown = config.enabledLanguages.r;
                     project = true;
                     gitPlugins = config.enabledPackages.gitPlugins;
                     background = config.theme.background;
@@ -202,11 +206,22 @@
     # Development shell configuration
     devShells = forSystems (system: let
       pkgs = import nixpkgs {inherit system;};
+      # When R is enabled, build an overlaid pkgs that includes the R-enhanced
+      # quarto (with knitr and other R packages baked in via extraRPackages).
+      # This ensures `quarto render` from the terminal also works correctly.
+      rPkgs =
+        if config.enabledLanguages.r
+        then
+          import nixpkgs {
+            inherit system;
+            overlays = [rixOverlay rOverlay];
+          }
+        else pkgs;
       # Language-specific packages that should be available in shell
-      languagePackages = with pkgs;
+      languagePackages =
         []
-        ++ (if config.enabledLanguages.r then [quarto] else [])
-        ++ (if config.enabledLanguages.python then [uv] else [])
+        ++ (if config.enabledLanguages.r then [rPkgs.quarto] else [])
+        ++ (if config.enabledLanguages.python then [pkgs.uv] else [])
         ++ (if config.enabledLanguages.julia then [] else []);
     in {
       default = pkgs.mkShell {
