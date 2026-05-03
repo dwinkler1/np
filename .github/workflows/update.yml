@@ -22,7 +22,6 @@ jobs:
           name: rde
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           extraPullNames: rstats-on-nix, nix-community
-      - run: cd templates/rde/ && nix develop -c p-updateDeps
       - name: Update ed flake.lock
         uses: DeterminateSystems/update-flake-lock@v28
         with:
