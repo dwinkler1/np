@@ -17,7 +17,7 @@
         nix = true;
         optional = false;
         python = false;
-        r = false;
+        r = true;
       };
 
       settings = let
@@ -69,7 +69,6 @@
 
       env = {
         IS_PROJECT_EDITOR = "1";
-        R_LIBS_USER = "./.nvimcom";
       };
 
       extraPackages = with pkgs; [
@@ -93,14 +92,18 @@
     forAllSystems = nixpkgs.lib.genAttrs systems;
     overlays = [inputs.nvimConfig.overlays.dependencies];
   in {
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system overlays;};
-      baseNvim = nvimConfig.packages.${system}.default;
-
-      nvim = (baseNvim.eval (projectSettings {inherit pkgs;})).config.wrapper;
-      default = nvim;
+      evalResult = nvimConfig.inputs.wrappers.lib.evalModules {
+        modules = [
+          nvimConfig.wrapperModules.default
+          projectSettings
+        ];
+      };
     in {
-      default = nvim;
+      default = evalResult.config.wrap { inherit pkgs; };
     });
 
     devShells = forAllSystems (system: let
@@ -108,14 +111,14 @@
       nv = self.packages.${system}.default;
     in {
       default = pkgs.mkShell {
-        packages = [nv pkgs.updateR];
+        packages = [nv];
       };
     });
   };
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    rixpkgs.url = "github:dwinkler1/rixpkgs/nixpkgs";
+    rixpkgs.url = "github:dwinkler1/rixpkgs/af2dd3f7b4b172077747c0869d4e30702fb71b0e";
     fran = {
       url = "github:dwinkler1/fran";
       inputs = {
@@ -128,12 +131,7 @@
         rixpkgs.follows = "rixpkgs";
         nixpkgs.follows = "nixpkgs";
         fran.follows = "fran";
-        "plugins-r".follows = "plugins-r";
       };
-    };
-    "plugins-r" = {
-      url = "github:R-nvim/R.nvim/v0.99.3";
-      flake = false;
     };
   };
 }
