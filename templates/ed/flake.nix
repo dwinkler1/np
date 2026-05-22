@@ -126,9 +126,21 @@
       nv = self.packages.${system}.default;
     in {
       default = pkgs.mkShell {
+        shellHook = ''
+          exec nu
+          alias gst='git status'
+          alias glol='git log --oneline --graph --decorate'
+          alias gc='git commit'
+          alias gl='git pull'
+          alias gp='git push'
+        '';
         packages =
-          [nv]
-
+          [
+            nv
+            pkgs.git
+            pkgs.pre-commit
+            pkgs.nushell
+          ]
           # ── R toolchain (R REPL, quarto, LSP, formatter) ─────
           ++ pkgs.lib.optionals cats.r (let
             r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
@@ -140,7 +152,6 @@
             pkgs.nvimcom
             pkgs.rnvimserver
           ])
-
           # ── Python toolchain (interpreter, LSP, formatter) ────
           ++ pkgs.lib.optionals cats.python [
             (pkgs.python3.withPackages (ps: pkgs.basePythonPackages ps ++ pythonPackages pkgs))
@@ -149,12 +160,11 @@
             pkgs.basedpyright
             pkgs.uv
           ]
-
           # ── Julia toolchain ───────────────────────────────────
           ++ pkgs.lib.optionals cats.julia [
-            pkgs.julia-bin.withPackages juliaPackages
+            pkgs.julia-bin.withPackages
+            juliaPackages
           ]
-
           # ── Markdown toolchain (quarto, zk) ───────────────────
           ++ (let
             r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
@@ -162,11 +172,12 @@
               if cats.r
               then pkgs.quarto.override {extraRPackages = r_packages;}
               else pkgs.quarto;
-          in pkgs.lib.optionals cats.markdown [
-            pkgs.python313Packages.pylatexenc
-            quarto
-            pkgs.zk
-          ]);
+          in
+            pkgs.lib.optionals cats.markdown [
+              pkgs.python313Packages.pylatexenc
+              quarto
+              pkgs.zk
+            ]);
       };
     });
   };
