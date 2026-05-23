@@ -131,7 +131,9 @@
         shellHook =
           nvimConfig.lib.shellHook evalResult.config
           + ''
-            exec nu
+            if [ -z "''${NO_NUSHELL:-}" ]; then
+              exec nu
+            fi
           '';
       };
     });

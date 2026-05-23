@@ -35,14 +35,18 @@ jobs:
       run: nix build ./templates/ed
 
     - name: Test R script
+      env:
+        NO_NUSHELL: '1'
       run: |
         cd templates/ed
-        nix develop --command nu -c "Rscript ${{ github.workspace }}/tests/ed/test.R"
+        nix develop --command bash -c "Rscript ${{ github.workspace }}/tests/ed/test.R"
 
     - name: Test Python script (disabled by default)
+      env:
+        NO_NUSHELL: '1'
       run: |
         cd templates/ed
-        nix develop --command nu -c "python3 ${{ github.workspace }}/tests/ed/test.py" || echo "SKIP: Python packages not enabled"
+        nix develop --command bash -c "python3 ${{ github.workspace }}/tests/ed/test.py" || echo "SKIP: Python packages not enabled"
 
   test-with-python:
     runs-on: ubuntu-latest
@@ -75,9 +79,11 @@ jobs:
         nix build
 
     - name: Test Python packages
+      env:
+        NO_NUSHELL: '1'
       run: |
         cd "$TEST_DIR"
-        nix develop --command nu -c "python3 ${{ github.workspace }}/tests/ed/test.py"
+        nix develop --command bash -c "python3 ${{ github.workspace }}/tests/ed/test.py"
 
   test-with-julia:
     runs-on: ubuntu-latest
@@ -110,6 +116,8 @@ jobs:
         nix build
 
     - name: Test Julia packages
+      env:
+        NO_NUSHELL: '1'
       run: |
         cd "$TEST_DIR"
-        nix develop --command nu -c "julia ${{ github.workspace }}/tests/ed/test.jl"
+        nix develop --command bash -c "julia ${{ github.workspace }}/tests/ed/test.jl"
