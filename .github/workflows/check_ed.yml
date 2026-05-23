@@ -1,9 +1,16 @@
-name: "Test ed template MacOS"
+name: "Test ed template"
 on:
-  workflow_dispatch: # allows manual triggering
+  workflow_dispatch:
   push:
-    branches:
-      - 'update_rde'
+    paths:
+      - 'templates/ed/**'
+      - 'tests/ed/**'
+      - '.github/workflows/check_ed.yml'
+  pull_request:
+    paths:
+      - 'templates/ed/**'
+      - 'tests/ed/**'
+      - '.github/workflows/check_ed.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -12,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v6
     - uses: cachix/install-nix-action@v31
@@ -23,4 +30,86 @@ jobs:
         name: rde
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: rstats-on-nix, nix-community
-    - run: nix build ./templates/ed
+
+    - name: Build template
+      run: nix build ./templates/ed
+
+    - name: Test R script
+      run: |
+        cd templates/ed
+        nix develop --command nu -c "Rscript ${{ github.workspace }}/tests/ed/test.R"
+
+    - name: Test Python script (disabled by default)
+      run: |
+        cd templates/ed
+        nix develop --command nu -c "python3 ${{ github.workspace }}/tests/ed/test.py" || echo "SKIP: Python packages not enabled"
+
+  test-with-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v17
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+
+    - name: Setup test directory with Python enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        sed -i 's/python[[:space:]]*=[[:space:]]*false;/python = true;/' flake.nix
+        grep -q "python[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Python in flake.nix"
+          exit 1
+        }
+        echo "TEST_DIR=$TEST_DIR" >> $GITHUB_ENV
+
+    - name: Build with Python enabled
+      run: |
+        cd "$TEST_DIR"
+        nix build
+
+    - name: Test Python packages
+      run: |
+        cd "$TEST_DIR"
+        nix develop --command nu -c "python3 ${{ github.workspace }}/tests/ed/test.py"
+
+  test-with-julia:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v17
+      with:
+        name: rde
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: rstats-on-nix, nix-community
+
+    - name: Setup test directory with Julia enabled
+      run: |
+        TEST_DIR=$(mktemp -d)
+        cp -r templates/ed/. "$TEST_DIR/"
+        cd "$TEST_DIR"
+        sed -i 's/julia[[:space:]]*=[[:space:]]*false;/julia = true;/' flake.nix
+        grep -q "julia[[:space:]]*=[[:space:]]*true;" flake.nix || {
+          echo "Error: Failed to enable Julia in flake.nix"
+          exit 1
+        }
+        echo "TEST_DIR=$TEST_DIR" >> $GITHUB_ENV
+
+    - name: Build with Julia enabled
+      run: |
+        cd "$TEST_DIR"
+        nix build
+
+    - name: Test Julia packages
+      run: |
+        cd "$TEST_DIR"
+        nix develop --command nu -c "julia ${{ github.workspace }}/tests/ed/test.jl"

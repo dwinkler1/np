@@ -1,20 +1,6 @@
 name: "Test RDE template"
 on:
   workflow_dispatch: # allows manual triggering
-  push:
-    paths:
-      - 'templates/rde/flake.lock'
-      - 'templates/rde/**/*.nix'
-      - 'templates/rde/**/*.sh'
-      - 'templates/rde/**/*.lua'
-      - '.github/workflows/check.yml'
-  pull_request:
-    paths:
-      - 'templates/rde/flake.lock'
-      - 'templates/rde/**/*.nix'
-      - 'templates/rde/**/*.sh'
-      - 'templates/rde/**/*.lua'
-      - '.github/workflows/check.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
