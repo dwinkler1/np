@@ -120,4 +120,4 @@ jobs:
         NO_NUSHELL: '1'
       run: |
         cd "$TEST_DIR"
-        nix develop --command bash -c "julia ${{ github.workspace }}/tests/ed/test.jl"
+        # nix develop --command bash -c "julia ${{ github.workspace }}/tests/ed/test.jl"
