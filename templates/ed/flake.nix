@@ -28,7 +28,6 @@
     rPackages = pkgs:
       (with pkgs.rpkgs.rPackages; [
         fixest
-        # pkgs.extraRPackages.musicMetadata
       ])
       ++ (
         if builtins.pathExists ./r-packages.nix
@@ -58,11 +57,89 @@
         else []
       );
 
+    # ── Per-language runtime dependencies ──────────────────────────
+    # Single source of truth for system/toolchain packages that
+    # flow to both runtimePkgs (wrapper PATH) and devShells.
+    mkRuntimeDeps = pkgs: {
+      always = [
+        pkgs.git
+        pkgs.pre-commit
+        pkgs.cowsay
+      ];
+      nix = [
+        pkgs.nil
+        pkgs.nixfmt
+      ];
+      r = let
+        r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
+      in [
+        (pkgs.rWrapper.override {packages = r_packages;})
+        pkgs.radianWrapper
+        pkgs.air-formatter
+        pkgs.yaml-language-server
+        pkgs.nvimcom
+        pkgs.rnvimserver
+      ];
+      python = [
+        (pkgs.python3.withPackages (ps:
+          (pkgs.basePythonPackages or (_: [])) ps
+          ++ pythonPackages pkgs))
+        pkgs.nodejs
+        pkgs.ruff
+        pkgs.basedpyright
+        pkgs.uv
+      ];
+      julia = [
+        (pkgs.julia-bin.withPackages juliaPackages)
+      ];
+      markdown = let
+        r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
+        quarto =
+          if cats.r
+          then pkgs.quarto.override {extraRPackages = r_packages;}
+          else pkgs.quarto;
+      in [
+        pkgs.python313Packages.pylatexenc
+        quarto
+        pkgs.zk
+      ];
+    };
+
+    enabledRuntimeDeps = pkgs: let
+      deps = mkRuntimeDeps pkgs;
+    in
+      deps.always
+      ++ (
+        if cats.nix
+        then deps.nix
+        else []
+      )
+      ++ (
+        if cats.r
+        then deps.r
+        else []
+      )
+      ++ (
+        if cats.python
+        then deps.python
+        else []
+      )
+      ++ (
+        if cats.julia
+        then deps.julia
+        else []
+      )
+      ++ (
+        if cats.markdown
+        then deps.markdown
+        else []
+      );
+
     systems = ["aarch64-darwin" "x86_64-linux" "aarch64-linux"];
     forAllSystems = nixpkgs.lib.genAttrs systems;
     overlays = [inputs.nvimConfig.overlays.dependencies];
   in {
-    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
 
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {
@@ -92,12 +169,10 @@
           IS_PROJECT_EDITOR = "1";
         };
 
-        runtimePkgs = with pkgs; [
-          cowsay
-        ];
+        runtimePkgs = enabledRuntimeDeps pkgs;
 
         specs.extraLua = let
-          name = builtins.baseNameOf (builtins.toString ./.);
+          name = builtins.baseNameOf (builtins.toString "${self.outPath}");
         in {
           data = pkgs.vimPlugins.mini-notify;
           before = ["INIT_MAIN"];
@@ -137,47 +212,9 @@
         packages =
           [
             nv
-            pkgs.git
-            pkgs.pre-commit
             pkgs.nushell
           ]
-          # ── R toolchain (R REPL, quarto, LSP, formatter) ─────
-          ++ pkgs.lib.optionals cats.r (let
-            r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
-          in [
-            (pkgs.rWrapper.override {packages = r_packages;})
-            pkgs.radianWrapper
-            pkgs.air-formatter
-            pkgs.yaml-language-server
-            pkgs.nvimcom
-            pkgs.rnvimserver
-          ])
-          # ── Python toolchain (interpreter, LSP, formatter) ────
-          ++ pkgs.lib.optionals cats.python [
-            (pkgs.python3.withPackages (ps: pkgs.basePythonPackages ps ++ pythonPackages pkgs))
-            pkgs.nodejs
-            pkgs.ruff
-            pkgs.basedpyright
-            pkgs.uv
-          ]
-          # ── Julia toolchain ───────────────────────────────────
-          ++ pkgs.lib.optionals cats.julia [
-            pkgs.julia-bin.withPackages
-            juliaPackages
-          ]
-          # ── Markdown toolchain (quarto, zk) ───────────────────
-          ++ (let
-            r_packages = (pkgs.baseRPackages or []) ++ rPackages pkgs;
-            quarto =
-              if cats.r
-              then pkgs.quarto.override {extraRPackages = r_packages;}
-              else pkgs.quarto;
-          in
-            pkgs.lib.optionals cats.markdown [
-              pkgs.python313Packages.pylatexenc
-              quarto
-              pkgs.zk
-            ]);
+          ++ enabledRuntimeDeps pkgs;
       };
     });
   };
