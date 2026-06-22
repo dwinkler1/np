@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: wimpysworld/nothing-but-nix@main
       with:
         hatchet-protocol: 'carve'
@@ -104,7 +104,7 @@ jobs:
   test-with-python:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: wimpysworld/nothing-but-nix@main
       with:
         hatchet-protocol: 'carve'
@@ -160,7 +160,7 @@ jobs:
   test-with-julia:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: wimpysworld/nothing-but-nix@main
       with:
         hatchet-protocol: 'carve'
