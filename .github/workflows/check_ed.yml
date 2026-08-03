@@ -21,7 +21,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: cachix/install-nix-action@v31
       with:
         github_access_token: ${{ github.token }}
@@ -51,7 +51,7 @@ jobs:
   test-with-python:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: cachix/install-nix-action@v31
       with:
         github_access_token: ${{ github.token }}
@@ -88,7 +88,7 @@ jobs:
   test-with-julia:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: cachix/install-nix-action@v31
       with:
         github_access_token: ${{ github.token }}
