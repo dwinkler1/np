@@ -58,10 +58,7 @@
 
           r =
             (with pkgs.rpkgs.rPackages; [
-              arrow
-              data_table
               fixest
-              pkgs.nvimcom
             ])
             ++ extraRPackages;
 
@@ -125,16 +122,10 @@
         packages =
           [
             nv
-            pkgs.nushell
           ]
           ++ nvimConfig.lib.devShellPackages evalResult.config;
         shellHook =
-          nvimConfig.lib.shellHook evalResult.config
-          + ''
-            if [ -z "''${NO_NUSHELL:-}" ]; then
-              exec nu
-            fi
-          '';
+          nvimConfig.lib.shellHook evalResult.config;
       };
     });
   };
