@@ -134,7 +134,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
     #rixpkgs.url = "github:dwinkler1/rixpkgs/af2dd3f7b4b172077747c0869d4e30702fb71b0e";
-    rixpkgs.url = "github:dwinkler1/rixpkgs";
+    rixpkgs.url = "github:dwinkler1/rixpkgs/nixpkgs";
 
     fran = {
       url = "github:dwinkler1/fran";
